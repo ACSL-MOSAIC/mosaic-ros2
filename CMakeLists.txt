@@ -16,7 +16,10 @@ find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 
 add_executable(mosaic-ros2
-        src/mosaic_ros2_main.cpp)
+        src/mosaic_ros2_main.cpp
+        src/mosaic_node.cpp
+	src/ros_logger.cpp
+)
 
 target_include_directories(mosaic-ros2 PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
