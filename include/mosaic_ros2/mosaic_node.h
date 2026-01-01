@@ -2,8 +2,8 @@
 // Created by yhkim on 1/1/26.
 //
 
-#ifndef BUILD_MOSAIC_NODE_H
-#define BUILD_MOSAIC_NODE_H
+#ifndef MOSAIC_ROS2_MOSAIC_NODE_H
+#define MOSAIC_ROS2_MOSAIC_NODE_H
 
 #include "rclcpp/node.hpp"
 
@@ -22,4 +22,4 @@ class MosaicNode : public rclcpp::Node {
 };
 }  // namespace mosaic
 
-#endif  // BUILD_MOSAIC_NODE_H
+#endif  // MOSAIC_ROS2_MOSAIC_NODE_H

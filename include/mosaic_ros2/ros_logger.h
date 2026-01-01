@@ -2,8 +2,8 @@
 // Created by yhkim on 1/1/26.
 //
 
-#ifndef BUILD_ROS_LOGGER_H
-#define BUILD_ROS_LOGGER_H
+#ifndef MOSAIC_ROS2_ROS_LOGGER_H
+#define MOSAIC_ROS2_ROS_LOGGER_H
 
 #include <mosaic_rtc_core/logger/logger.h>
 
@@ -21,4 +21,4 @@ class RosLogger : public core_log::ILogger {
 };
 }  // namespace mosaic
 
-#endif  // BUILD_ROS_LOGGER_H
+#endif  // MOSAIC_ROS2_ROS_LOGGER_H

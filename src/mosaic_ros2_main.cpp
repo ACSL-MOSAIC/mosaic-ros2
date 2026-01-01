@@ -1,5 +1,5 @@
-#include <mosaic-ros2/mosaic_node.h>
-#include <mosaic-ros2/ros_logger.h>
+#include <mosaic_ros2/mosaic_node.h>
+#include <mosaic_ros2/ros_logger.h>
 #include <mosaic_rtc_core/logger/logger.h>
 
 #include "rclcpp/rclcpp.hpp"
