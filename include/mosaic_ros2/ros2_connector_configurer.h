@@ -2,19 +2,19 @@
 // Created by yhkim on 1/1/26.
 //
 
-#ifndef MOSAIC_ROS2_ROS2_CONFIGURER_H
-#define MOSAIC_ROS2_ROS2_CONFIGURER_H
+#ifndef MOSAIC_ROS2_ROS2_CONNECTOR_CONFIGURER_H
+#define MOSAIC_ROS2_ROS2_CONNECTOR_CONFIGURER_H
 
 #include <memory>
 
 #include "mosaic_node.h"
 
 namespace mosaic::ros2 {
-class ROS2Configurer {
+class ROS2ConnectorConfigurer {
   public:
-    ROS2Configurer() = default;
+    ROS2ConnectorConfigurer() = default;
 
-    virtual ~ROS2Configurer() = default;
+    virtual ~ROS2ConnectorConfigurer() = default;
 
     void SetMosaicNode(std::shared_ptr<MosaicNode> mosaic_node) {
         mosaic_node_ = std::move(mosaic_node);
@@ -24,4 +24,4 @@ class ROS2Configurer {
 };
 }  // namespace mosaic::ros2
 
-#endif  // MOSAIC_ROS2_ROS2_CONFIGURER_H
+#endif  // MOSAIC_ROS2_ROS2_CONNECTOR_CONFIGURER_H

@@ -1,5 +1,8 @@
+#include <mosaic_auto_configurer/connector/connector_resolver.h>
 #include <mosaic_ros2/mosaic_node.h>
+#include <mosaic_ros2/ros2_auto_configurer.h>
 #include <mosaic_ros2/ros_logger.h>
+#include <mosaic_ros2/sensor_msgs/image_connector.h>
 #include <mosaic_rtc_core/logger/logger.h>
 
 #include "rclcpp/rclcpp.hpp"
@@ -17,6 +20,7 @@ struct Parameters {
 };
 
 std::shared_ptr<Parameters> GetParameters();
+void AutoRegisterConnectors();
 
 void SetMOSAICLog(const std::shared_ptr<Parameters>& parameters, rclcpp::Logger logger);
 void SetWebRTCLog(const std::shared_ptr<Parameters>& parameters);
@@ -24,6 +28,8 @@ void SetWebRTCLog(const std::shared_ptr<Parameters>& parameters);
 int main(int argc, char** argv) {
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
+
+    AutoRegisterConnectors();
 
     rclcpp::init(argc, argv);
 
@@ -33,6 +39,10 @@ int main(int argc, char** argv) {
 
     const auto node = std::make_shared<mosaic::ros2::MosaicNode>();
     SetMOSAICLog(parameters, node->get_logger());
+
+    const auto auto_configurer = std::make_shared<mosaic::ros2::ROS2AutoConfigurer>();
+    auto_configurer->SetMosaicNode(node);
+    auto_configurer->AutoConfigure("mosaic_config.yaml");
 
     return 0;
 }
@@ -47,6 +57,11 @@ std::shared_ptr<Parameters> GetParameters() {
     parameters->webrtc_log_level = param_node->get_parameter("webrtc_log_level").as_string();
 
     return parameters;
+}
+
+void AutoRegisterConnectors() {
+    mosaic::auto_configurer::ConnectorResolver::GetInstance()
+        .RegisterConfigurableConnector<mosaic::ros2::sensor_connector::ImageConnectorConfigurer>();
 }
 
 void SetMOSAICLog(const std::shared_ptr<Parameters>& parameters, rclcpp::Logger logger) {

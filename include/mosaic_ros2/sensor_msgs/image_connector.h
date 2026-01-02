@@ -8,28 +8,26 @@
 #include <mosaic_auto_configurer/connector/i_mt_handler_configurer.h>
 #include <mosaic_rtc_core/handlers/media_track/a_media_track_handler.h>
 
-#include "mosaic_ros2/ros2_configurer.h"
+#include "mosaic_ros2/ros2_connector_configurer.h"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 
 namespace mosaic::ros2::sensor_connector {
 cv::Mat RosImageToCvMat(const sensor_msgs::msg::Image::SharedPtr& msg);
 
-class ImageConnectorConfigurer : public auto_configurer::IMTHandlerConfigurer, public ROS2Configurer {
+class ImageConnectorConfigurer : public auto_configurer::IMTHandlerConfigurer, public ROS2ConnectorConfigurer {
   public:
+    ImageConnectorConfigurer() = default;
+
     std::string GetConnectorType() const override {
         return "ROS2Image";
     }
 
-    void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector,
-                   const auto_configurer::ConnectorConfig& connector_config) override;
-
-    std::shared_ptr<handlers::IMediaTrackHandler> GetHandler() override;
+    void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector) override;
 
     void Callback(sensor_msgs::msg::Image::SharedPtr msg);
 
   private:
-    std::shared_ptr<handlers::IMediaTrackHandler> handler_;
     std::shared_ptr<rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr> subscription_;
 };
 

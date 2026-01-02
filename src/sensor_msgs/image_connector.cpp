@@ -1,5 +1,5 @@
 //
-// Created by ubuntu on 1/1/26.
+// Created by yhkim on 1/1/26.
 //
 
 #include "mosaic_ros2/sensor_msgs/image_connector.h"
@@ -12,23 +12,18 @@
 
 using namespace mosaic::ros2::sensor_connector;
 
-void ImageConnectorConfigurer::Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector,
-                                         const auto_configurer::ConnectorConfig& connector_config) {
+void ImageConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicConnector> mosaic_connector) {
     MOSAIC_LOG_INFO("Configuring ROS2 sensor_msgs::Image Connector...");
 
-    handler_ = std::make_shared<ImageMediaTrack>(connector_config.label, mosaic_node_);
+    handler_ = std::make_shared<ImageMediaTrack>(connector_config_.label, mosaic_node_);
     mosaic_connector->AddMediaTrackHandler(handler_);
 
     const auto subscription = mosaic_node_->create_subscription<sensor_msgs::msg::Image>(
-        connector_config.params.at("ros2_topic"),
+        connector_config_.params.at("ros2_topic"),
         10,
         std::bind(&ImageConnectorConfigurer::Callback, this, std::placeholders::_1));
 
     mosaic_node_->AddSubscription(subscription);
-}
-
-std::shared_ptr<mosaic::handlers::IMediaTrackHandler> ImageConnectorConfigurer::GetHandler() {
-    return handler_;
 }
 
 void ImageConnectorConfigurer::Callback(sensor_msgs::msg::Image::SharedPtr msg) {
@@ -87,7 +82,7 @@ void ImageMediaTrack::ConvertingLoop() {
     }
 }
 
-cv::Mat RosImageToCvMat(const sensor_msgs::msg::Image::SharedPtr& msg) {
+cv::Mat mosaic::ros2::sensor_connector::RosImageToCvMat(const sensor_msgs::msg::Image::SharedPtr& msg) {
     if (!msg) {
         return cv::Mat();
     }
