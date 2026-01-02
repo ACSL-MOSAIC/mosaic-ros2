@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 
     SetWebRTCLog(parameters);
 
-    const auto node = std::make_shared<mosaic::MosaicNode>();
+    const auto node = std::make_shared<mosaic::ros2::MosaicNode>();
     SetMOSAICLog(parameters, node->get_logger());
 
     return 0;

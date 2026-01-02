@@ -7,7 +7,7 @@
 
 #include "rclcpp/node.hpp"
 
-namespace mosaic {
+namespace mosaic::ros2 {
 class MosaicNode : public rclcpp::Node {
   public:
     explicit MosaicNode();
@@ -20,6 +20,6 @@ class MosaicNode : public rclcpp::Node {
     std::vector<std::shared_ptr<rclcpp::PublisherBase>> publishers_;
     std::vector<std::shared_ptr<rclcpp::SubscriptionBase>> subscriptions_;
 };
-}  // namespace mosaic
+}  // namespace mosaic::ros2
 
 #endif  // MOSAIC_ROS2_MOSAIC_NODE_H

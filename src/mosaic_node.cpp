@@ -2,11 +2,13 @@
 // Created by yhkim on 1/1/26.
 //
 
-#include "mosaic_ros2/mosaic_node.h"
+#include <mosaic_ros2/mosaic_node.h>
 
-using namespace mosaic;
+#include "rclcpp/node.hpp"
 
-MosaicNode::MosaicNode() : Node("mosaic_node") {
+using namespace mosaic::ros2;
+
+MosaicNode::MosaicNode() : rclcpp::Node("mosaic_node") {
     RCLCPP_INFO(this->get_logger(), "MosaicNode has been created.");
 }
 
