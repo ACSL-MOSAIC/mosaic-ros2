@@ -20,9 +20,11 @@ struct Parameters {
 };
 
 std::shared_ptr<Parameters> GetParameters();
+
 void AutoRegisterConnectors();
 
 void SetMOSAICLog(const std::shared_ptr<Parameters>& parameters, rclcpp::Logger logger);
+
 void SetWebRTCLog(const std::shared_ptr<Parameters>& parameters);
 
 int main(int argc, char** argv) {
