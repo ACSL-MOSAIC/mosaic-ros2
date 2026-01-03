@@ -16,12 +16,12 @@ find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 
-# ROS_DISTRO 환경 변수 읽기
+# Read ROS_DISTRO environment variable
 if (DEFINED ENV{ROS_DISTRO})
     set(ROS_DISTRO $ENV{ROS_DISTRO})
     message(STATUS "Detected ROS_DISTRO: ${ROS_DISTRO}")
 
-    # Humble vs Jazzy 구분을 위한 전처리기 매크로 정의
+    # Define preprocessor macro to distinguish between Humble and Jazzy
     if (ROS_DISTRO STREQUAL "humble")
         add_compile_definitions(ROS_DISTRO_HUMBLE)
     elseif (ROS_DISTRO STREQUAL "jazzy")
