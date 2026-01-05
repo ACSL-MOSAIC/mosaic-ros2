@@ -1,8 +1,10 @@
 #include <mosaic_auto_configurer/connector/connector_resolver.h>
+#include <mosaic_ros2/geometry_msgs/twist_connector.h>
 #include <mosaic_ros2/mosaic_node.h>
 #include <mosaic_ros2/ros2_auto_configurer.h>
 #include <mosaic_ros2/ros_logger.h>
 #include <mosaic_ros2/sensor_msgs/image_connector.h>
+#include <mosaic_ros2/sensor_msgs/nav_sat_fix_connector.h>
 #include <mosaic_rtc_core/logger/logger.h>
 
 #include "rclcpp/rclcpp.hpp"
@@ -63,7 +65,12 @@ std::shared_ptr<Parameters> GetParameters() {
 
 void AutoRegisterConnectors() {
     mosaic::auto_configurer::ConnectorResolver::GetInstance()
+        .RegisterConfigurableConnector<mosaic::ros2::geometry_connector::TwistConnectorConfigurer>();
+
+    mosaic::auto_configurer::ConnectorResolver::GetInstance()
         .RegisterConfigurableConnector<mosaic::ros2::sensor_connector::ImageConnectorConfigurer>();
+    mosaic::auto_configurer::ConnectorResolver::GetInstance()
+        .RegisterConfigurableConnector<mosaic::ros2::sensor_connector::NavSatFixConnectorConfigurer>();
 }
 
 void SetMOSAICLog(const std::shared_ptr<Parameters>& parameters, rclcpp::Logger logger) {

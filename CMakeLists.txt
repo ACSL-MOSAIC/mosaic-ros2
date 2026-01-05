@@ -31,8 +31,24 @@ else ()
     message(WARNING "ROS_DISTRO environment variable not set")
 endif ()
 
+add_library(mosaic_geometry_msgs STATIC
+        src/geometry_msgs/twist_connector.cpp
+)
+target_include_directories(mosaic_geometry_msgs PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
+target_link_libraries(mosaic_geometry_msgs
+        mosaic::mosaic-auto-configurer
+)
+ament_target_dependencies(mosaic_geometry_msgs
+        rclcpp
+        geometry_msgs
+)
+
 add_library(mosaic_sensor_msgs STATIC
         src/sensor_msgs/image_connector.cpp
+        src/sensor_msgs/nav_sat_fix_connector.cpp
 )
 target_include_directories(mosaic_sensor_msgs PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -55,6 +71,7 @@ add_executable(mosaic-ros2
 )
 target_link_libraries(mosaic-ros2
         mosaic_sensor_msgs
+        mosaic_geometry_msgs
         mosaic::mosaic-rtc-core
         mosaic::mosaic-auto-configurer
 )
