@@ -11,7 +11,7 @@ void TwistConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicConne
     MOSAIC_LOG_INFO("Configuring ROS2 geometry_msgs::Twist Connector...");
 
     publisher_ =
-        mosaic_node_->create_publisher<geometry_msgs::msg::Twist>(connector_config_.params.at("ros2_topic"), 10);
+        mosaic_node_->create_publisher<geometry_msgs::msg::Twist>(connector_config_.params.at("topic_name"), 10);
 
     handler_ = std::make_shared<TwistDataChannel>(connector_config_.label, publisher_);
     mosaic_connector->AddDataChannelHandler(handler_);
@@ -23,11 +23,6 @@ TwistMessage TwistDataChannel::ConvertJsonToData(const Json::Value& json_data) {
     TwistMessage message;
     if (json_data.isMember("direction") && json_data["direction"].isString()) {
         message.direction = json_data["direction"].asString();
-
-        // const auto now = std::chrono::high_resolution_clock::now();
-        // MOSAIC_LOG_INFO("REMOTE CONTROL MESSAGE RECEIVED: SEND TIMESTAMP: {}, RECEIVE TIMESTAMP: {}",
-        // json_data["timestamp"].asLargestUInt(),
-        // std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count());
     } else {
         MOSAIC_LOG_ERROR("Invalid remote control message: 'direction' field is missing or not a string.");
         return message;

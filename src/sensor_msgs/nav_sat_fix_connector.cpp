@@ -14,7 +14,7 @@ void NavSatFixConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicC
     mosaic_connector->AddDataChannelHandler(handler_);
 
     subscription_ = mosaic_node_->create_subscription<sensor_msgs::msg::NavSatFix>(
-        connector_config_.params.at("ros2_topic"),
+        connector_config_.params.at("topic_name"),
         10,
         std::bind(&NavSatFixConnectorConfigurer::Callback, this, std::placeholders::_1));
 

@@ -20,7 +20,7 @@ class TwistConnectorConfigurer : public auto_configurer::IDCHandlerConfigurer, p
     TwistConnectorConfigurer() = default;
 
     std::string GetConnectorType() const override {
-        return "ROS2Twist";
+        return "ros2-receiver-geometry-Twist";
     }
 
     void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector) override;

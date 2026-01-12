@@ -20,7 +20,7 @@ class ImageConnectorConfigurer : public auto_configurer::IMTHandlerConfigurer, p
     ImageConnectorConfigurer() = default;
 
     std::string GetConnectorType() const override {
-        return "ROS2Image";
+        return "ros2-sender-sensor-Image";
     }
 
     void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector) override;

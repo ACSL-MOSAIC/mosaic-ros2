@@ -1,5 +1,6 @@
 #include <mosaic_auto_configurer/connector/connector_resolver.h>
 #include <mosaic_ros2/geometry_msgs/twist_connector.h>
+#include <mosaic_ros2/geometry_msgs/twist_stamped_connector.h>
 #include <mosaic_ros2/mosaic_node.h>
 #include <mosaic_ros2/ros2_auto_configurer.h>
 #include <mosaic_ros2/ros_logger.h>
@@ -17,6 +18,7 @@ void signal_handler(int signal) {
 }
 
 struct Parameters {
+    std::string config_path;
     std::string mosaic_log_level;
     std::string webrtc_log_level;
 };
@@ -46,17 +48,19 @@ int main(int argc, char** argv) {
 
     const auto auto_configurer = std::make_shared<mosaic::ros2::ROS2AutoConfigurer>();
     auto_configurer->SetMosaicNode(node);
-    auto_configurer->AutoConfigure("mosaic_config.yaml");
+    auto_configurer->AutoConfigure(parameters->config_path);
 
     return 0;
 }
 
 std::shared_ptr<Parameters> GetParameters() {
     const auto param_node = rclcpp::Node::make_shared("param_node");
+    param_node->declare_parameter<std::string>("config", "./mosaic_config.yaml");
     param_node->declare_parameter<std::string>("mosaic_log_level", "info");
     param_node->declare_parameter<std::string>("webrtc_log_level", "none");
 
     const auto parameters = std::make_shared<Parameters>();
+    parameters->config_path = param_node->get_parameter("config").as_string();
     parameters->mosaic_log_level = param_node->get_parameter("mosaic_log_level").as_string();
     parameters->webrtc_log_level = param_node->get_parameter("webrtc_log_level").as_string();
 
@@ -66,6 +70,8 @@ std::shared_ptr<Parameters> GetParameters() {
 void AutoRegisterConnectors() {
     mosaic::auto_configurer::ConnectorResolver::GetInstance()
         .RegisterConfigurableConnector<mosaic::ros2::geometry_connector::TwistConnectorConfigurer>();
+    mosaic::auto_configurer::ConnectorResolver::GetInstance()
+        .RegisterConfigurableConnector<mosaic::ros2::geometry_connector::TwistStampedConnectorConfigurer>();
 
     mosaic::auto_configurer::ConnectorResolver::GetInstance()
         .RegisterConfigurableConnector<mosaic::ros2::sensor_connector::ImageConnectorConfigurer>();

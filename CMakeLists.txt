@@ -33,6 +33,7 @@ endif ()
 
 add_library(mosaic_geometry_msgs STATIC
         src/geometry_msgs/twist_connector.cpp
+        src/geometry_msgs/twist_stamped_connector.cpp
 )
 target_include_directories(mosaic_geometry_msgs PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

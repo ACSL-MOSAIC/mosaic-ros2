@@ -18,7 +18,7 @@ class NavSatFixConnectorConfigurer : public auto_configurer::IDCHandlerConfigure
     NavSatFixConnectorConfigurer() = default;
 
     std::string GetConnectorType() const override {
-        return "ROS2NavSatFix";
+        return "ros2-sender-sensor-NavSatFix";
     }
 
     void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector) override;

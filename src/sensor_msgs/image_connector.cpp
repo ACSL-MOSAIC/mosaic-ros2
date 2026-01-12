@@ -19,7 +19,7 @@ void ImageConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicConne
     mosaic_connector->AddMediaTrackHandler(handler_);
 
     const auto subscription = mosaic_node_->create_subscription<sensor_msgs::msg::Image>(
-        connector_config_.params.at("ros2_topic"),
+        connector_config_.params.at("topic_name"),
         10,
         std::bind(&ImageConnectorConfigurer::Callback, this, std::placeholders::_1));
 
