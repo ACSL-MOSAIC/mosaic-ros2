@@ -24,9 +24,12 @@ void ImageConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicConne
         std::bind(&ImageConnectorConfigurer::Callback, this, std::placeholders::_1));
 
     mosaic_node_->AddSubscription(subscription);
+    MOSAIC_LOG_INFO("Configuring ROS2 sensor_msgs::Image Connector Done!");
 }
 
 void ImageConnectorConfigurer::Callback(sensor_msgs::msg::Image::SharedPtr msg) {
+    MOSAIC_LOG_DEBUG("sensor_msgs::msg::Image received");
+
     if (handler_) {
         if (const auto image_handler = std::dynamic_pointer_cast<ImageMediaTrack>(handler_)) {
             image_handler->OnImageReceived(msg);
@@ -75,6 +78,11 @@ void ImageMediaTrack::ConvertingLoop() {
             std::lock_guard lock(node_mutex_);
             // Convert ROS image to WebRTC VideoFrame
             auto cv_image = RosImageToCvMat(last_image_);
+            if (cv_image.empty()) {
+                MOSAIC_LOG_ERROR("Failed to convert ROS Image to OpenCV Mat");
+                changed_ = false;
+                continue;
+            }
             SendFrame(cv_image, start_time_);
             changed_ = false;
         }
@@ -89,10 +97,10 @@ cv::Mat mosaic::ros2::sensor_connector::RosImageToCvMat(const sensor_msgs::msg::
 
     // Convert ROS Image to OpenCV Mat using cv_bridge
     try {
-        cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
+        const cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
         return cv_ptr->image;
     } catch (cv_bridge::Exception& e) {
-        std::cerr << "cv_bridge exception: " << e.what() << std::endl;
+        MOSAIC_LOG_ERROR("cv_bridge exception: %s", e.what());
         return cv::Mat();
     }
 }

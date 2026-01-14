@@ -19,9 +19,12 @@ void NavSatFixConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicC
         std::bind(&NavSatFixConnectorConfigurer::Callback, this, std::placeholders::_1));
 
     mosaic_node_->AddSubscription(subscription_);
+    MOSAIC_LOG_INFO("Configuring ROS2 sensor_msgs::NavSatFix Connector Done!");
 }
 
 void NavSatFixConnectorConfigurer::Callback(sensor_msgs::msg::NavSatFix::SharedPtr msg) {
+    MOSAIC_LOG_DEBUG("sensor_msgs::msg::NavSatFix received");
+
     if (handler_) {
         if (const auto nav_sat_fix_handler = std::dynamic_pointer_cast<NavSatFixDataChannel>(handler_)) {
             nav_sat_fix_handler->OnNavSatFixReceived(msg);
@@ -31,6 +34,7 @@ void NavSatFixConnectorConfigurer::Callback(sensor_msgs::msg::NavSatFix::SharedP
 
 void NavSatFixDataChannel::OnNavSatFixReceived(const sensor_msgs::msg::NavSatFix::SharedPtr& nav_sat_fix) {
     if (!Sendable()) {
+        MOSAIC_LOG_DEBUG("NavSatFixDataChannel Not Sendable!");
         return;
     }
 

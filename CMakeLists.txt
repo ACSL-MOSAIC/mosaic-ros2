@@ -10,6 +10,8 @@ find_package(ament_cmake REQUIRED)
 find_package(mosaic-rtc-core REQUIRED)
 find_package(mosaic-auto-configurer REQUIRED)
 
+find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
+
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)

@@ -5,8 +5,8 @@
 #ifndef MOSAIC_ROS2_TWIST_STAMPED_CONNECTOR_H
 #define MOSAIC_ROS2_TWIST_STAMPED_CONNECTOR_H
 
-#include <mosaic_auto_configurer/connector/i_dc_handler_configurer.h>
-#include <mosaic_rtc_core/handlers/data_channel/data_channel_receivable.h>
+#include <mosaic/auto_configurer/connector/i_dc_handler_configurer.h>
+#include <mosaic/handlers/data_channel/data_channel_receivable.h>
 
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "mosaic_ros2/ros2_connector_configurer.h"

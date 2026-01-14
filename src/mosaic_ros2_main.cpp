@@ -1,4 +1,7 @@
-#include <mosaic_auto_configurer/connector/connector_resolver.h>
+#include <mosaic/auto_configurer/config_reader/config_reader_resolver.h>
+#include <mosaic/auto_configurer/config_reader/yaml_config_reader.h>
+#include <mosaic/auto_configurer/connector/connector_resolver.h>
+#include <mosaic/logger/logger.h>
 #include <mosaic_ros2/geometry_msgs/twist_connector.h>
 #include <mosaic_ros2/geometry_msgs/twist_stamped_connector.h>
 #include <mosaic_ros2/mosaic_node.h>
@@ -6,7 +9,6 @@
 #include <mosaic_ros2/ros_logger.h>
 #include <mosaic_ros2/sensor_msgs/image_connector.h>
 #include <mosaic_ros2/sensor_msgs/nav_sat_fix_connector.h>
-#include <mosaic_rtc_core/logger/logger.h>
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -18,7 +20,7 @@ void signal_handler(int signal) {
 }
 
 struct Parameters {
-    std::string config_path;
+    std::string mosaic_config_path;
     std::string mosaic_log_level;
     std::string webrtc_log_level;
 };
@@ -35,6 +37,9 @@ int main(int argc, char** argv) {
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
 
+    mosaic::auto_configurer::ConfigReaderResolver::GetInstance()
+        .RegisterConfigReader<mosaic::auto_configurer::YamlConfigReader>();
+
     AutoRegisterConnectors();
 
     rclcpp::init(argc, argv);
@@ -48,19 +53,42 @@ int main(int argc, char** argv) {
 
     const auto auto_configurer = std::make_shared<mosaic::ros2::ROS2AutoConfigurer>();
     auto_configurer->SetMosaicNode(node);
-    auto_configurer->AutoConfigure(parameters->config_path);
+    auto_configurer->AutoConfigure(parameters->mosaic_config_path);
 
+    std::thread ros_thread([node]() {
+        while (rclcpp::ok() && !shutdown_flag.load()) {
+            rclcpp::spin_some(node);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    });
+
+    while (rclcpp::ok() && !shutdown_flag.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    MOSAIC_LOG_INFO("Shutting down...");
+
+    try {
+        auto_configurer->GetMosaicConnector()->ShuttingDown();
+    } catch (...) {
+    }
+
+    if (ros_thread.joinable()) {
+        ros_thread.join();
+    }
+
+    rclcpp::shutdown();
     return 0;
 }
 
 std::shared_ptr<Parameters> GetParameters() {
     const auto param_node = rclcpp::Node::make_shared("param_node");
-    param_node->declare_parameter<std::string>("config", "./mosaic_config.yaml");
+    param_node->declare_parameter<std::string>("mosaic_config", "./mosaic_config.yaml");
     param_node->declare_parameter<std::string>("mosaic_log_level", "info");
     param_node->declare_parameter<std::string>("webrtc_log_level", "none");
 
     const auto parameters = std::make_shared<Parameters>();
-    parameters->config_path = param_node->get_parameter("config").as_string();
+    parameters->mosaic_config_path = param_node->get_parameter("mosaic_config").as_string();
     parameters->mosaic_log_level = param_node->get_parameter("mosaic_log_level").as_string();
     parameters->webrtc_log_level = param_node->get_parameter("webrtc_log_level").as_string();
 

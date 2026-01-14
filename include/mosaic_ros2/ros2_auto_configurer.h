@@ -5,7 +5,7 @@
 #ifndef BUILD_ROS2_CONFIGURER_H
 #define BUILD_ROS2_CONFIGURER_H
 
-#include <mosaic_auto_configurer/auto_configurer.h>
+#include <mosaic/auto_configurer/auto_configurer.h>
 
 #include "mosaic_node.h"
 
@@ -23,6 +23,8 @@ class ROS2AutoConfigurer : public auto_configurer::AutoConfigurer {
 
   private:
     std::shared_ptr<MosaicNode> mosaic_node_;
+
+    void ValidateConnectorConfigs();
 };
 
 }  // namespace mosaic::ros2
