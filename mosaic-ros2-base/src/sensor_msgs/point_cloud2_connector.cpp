@@ -6,7 +6,7 @@
 
 #include <json/json.h>
 
-#include "mosaic_ros2/sensor_msgs/util/point_cloud_sender.h"
+#include "mosaic_ros2/sensor_msgs/util/point_cloud2_sender.h"
 
 using namespace mosaic::ros2::sensor_connector;
 

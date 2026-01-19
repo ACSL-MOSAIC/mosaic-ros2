@@ -2,7 +2,7 @@
 // Created by yhkim on 1/19/26.
 //
 
-#include "mosaic_ros2/sensor_msgs/util/point_cloud_sender.h"
+#include "mosaic_ros2/sensor_msgs/util/point_cloud2_sender.h"
 
 #include <array>
 #include <cmath>

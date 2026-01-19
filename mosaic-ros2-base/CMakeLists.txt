@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(mosaic-ros2)
+project(mosaic-ros2-base VERSION 1.0.0)
 
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
@@ -92,7 +92,7 @@ add_library(mosaic_sensor_msgs STATIC
         src/sensor_msgs/image_connector.cpp
         src/sensor_msgs/nav_sat_fix_connector.cpp
         src/sensor_msgs/point_cloud2_connector.cpp
-        src/sensor_msgs/util/point_cloud_sender.cpp
+        src/sensor_msgs/util/point_cloud2_sender.cpp
         ${PROTO_SRCS}
 )
 target_include_directories(mosaic_sensor_msgs PUBLIC
