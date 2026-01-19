@@ -5,16 +5,16 @@
 #ifndef MOSAIC_ROS2_IMAGE_H
 #define MOSAIC_ROS2_IMAGE_H
 
-#include <mosaic/auto_configurer/connector/a_mt_handler_configurer.h>
 #include <mosaic/handlers/media_track/a_media_track_handler.h>
 
-#include "mosaic_ros2/ros2_connector_configurer.h"
+#include "mosaic_ros2/configurer/ros2_a_mt_handler_configurer.h"
+#include "mosaic_ros2/node/mosaic_node.h"
 #include "sensor_msgs/msg/image.hpp"
 
 namespace mosaic::ros2::sensor_connector {
 cv::Mat RosImageToCvMat(const sensor_msgs::msg::Image::SharedPtr& msg);
 
-class ImageConnectorConfigurer : public auto_configurer::AMTHandlerConfigurer, public ROS2ConnectorConfigurer {
+class ImageConnectorConfigurer : public ROS2AMTHandlerConfigurer {
   public:
     ImageConnectorConfigurer() = default;
 

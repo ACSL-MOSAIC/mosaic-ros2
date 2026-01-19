@@ -114,9 +114,10 @@ ament_target_dependencies(mosaic_sensor_msgs
 
 add_executable(mosaic-ros2
         src/mosaic_ros2_main.cpp
-        src/mosaic_node.cpp
-        src/ros2_auto_configurer.cpp
-        src/ros_logger.cpp
+        src/configurer/ros2_auto_configurer.cpp
+        src/configurer/ros2_connector_configurer.cpp
+        src/node/mosaic_node.cpp
+        src/logger/ros_logger.cpp
 )
 target_link_libraries(mosaic-ros2
         mosaic_sensor_msgs

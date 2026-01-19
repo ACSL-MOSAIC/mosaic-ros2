@@ -2,14 +2,14 @@
 #include <mosaic/auto_configurer/config_reader/yaml_config_reader.h>
 #include <mosaic/auto_configurer/connector/connector_resolver.h>
 #include <mosaic/logger/logger.h>
-#include <mosaic_ros2/geometry_msgs/twist_connector.h>
-#include <mosaic_ros2/geometry_msgs/twist_stamped_connector.h>
-#include <mosaic_ros2/mosaic_node.h>
-#include <mosaic_ros2/ros2_auto_configurer.h>
-#include <mosaic_ros2/ros_logger.h>
-#include <mosaic_ros2/sensor_msgs/image_connector.h>
-#include <mosaic_ros2/sensor_msgs/nav_sat_fix_connector.h>
 
+#include "mosaic_ros2/configurer/ros2_auto_configurer.h"
+#include "mosaic_ros2/geometry_msgs/twist_connector.h"
+#include "mosaic_ros2/geometry_msgs/twist_stamped_connector.h"
+#include "mosaic_ros2/logger/ros_logger.h"
+#include "mosaic_ros2/node/mosaic_node.h"
+#include "mosaic_ros2/sensor_msgs/image_connector.h"
+#include "mosaic_ros2/sensor_msgs/nav_sat_fix_connector.h"
 #include "rclcpp/rclcpp.hpp"
 
 std::atomic<bool> shutdown_flag(false);

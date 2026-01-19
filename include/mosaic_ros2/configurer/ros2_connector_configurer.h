@@ -7,20 +7,24 @@
 
 #include <memory>
 
-#include "mosaic_node.h"
+#include <mosaic/configs_decl.h>
+
+#include "mosaic_ros2/node/mosaic_node.h"
 
 namespace mosaic::ros2 {
 class ROS2ConnectorConfigurer {
   public:
     ROS2ConnectorConfigurer() = default;
 
-    virtual ~ROS2ConnectorConfigurer() = default;
-
     void SetMosaicNode(std::shared_ptr<MosaicNode> mosaic_node) {
         mosaic_node_ = std::move(mosaic_node);
     }
 
+    void ValidateROS2Config(const core::ConnectorConfig& connector_config);
+
+  protected:
     std::shared_ptr<MosaicNode> mosaic_node_;
+    std::string topic_name_;
 };
 }  // namespace mosaic::ros2
 

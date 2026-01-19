@@ -257,6 +257,7 @@ void PointCloud2Sender::Initialize(const sensor_msgs::msg::PointCloud2::SharedPt
 
     // Calculate estimated chunks per level
     // Divide total points into 5 levels and estimate required chunks per level
+    // TODO: NUM_LEVELS and data channel size??
     constexpr size_t NUM_LEVELS = 5;
     const size_t avg_points_per_level = config_.total_points / NUM_LEVELS;
     config_.estimated_chunks_per_level =

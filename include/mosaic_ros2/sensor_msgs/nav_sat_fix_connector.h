@@ -5,14 +5,13 @@
 #ifndef MOSAIC_ROS2_NAV_SAT_FIX_CONNECTOR_H
 #define MOSAIC_ROS2_NAV_SAT_FIX_CONNECTOR_H
 
-#include <mosaic/auto_configurer/connector/a_dc_handler_configurer.h>
 #include <mosaic/handlers/data_channel/data_channel_sendable.h>
 
-#include "mosaic_ros2/ros2_connector_configurer.h"
+#include "mosaic_ros2/configurer/ros2_a_dc_handler_configurer.h"
 #include "sensor_msgs/msg/nav_sat_fix.hpp"
 
 namespace mosaic::ros2::sensor_connector {
-class NavSatFixConnectorConfigurer : public auto_configurer::ADCHandlerConfigurer, public ROS2ConnectorConfigurer {
+class NavSatFixConnectorConfigurer : public ROS2ADCHandlerConfigurer {
   public:
     NavSatFixConnectorConfigurer() = default;
 

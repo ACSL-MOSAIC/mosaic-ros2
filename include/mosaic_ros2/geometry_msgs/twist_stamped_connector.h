@@ -5,16 +5,15 @@
 #ifndef MOSAIC_ROS2_TWIST_STAMPED_CONNECTOR_H
 #define MOSAIC_ROS2_TWIST_STAMPED_CONNECTOR_H
 
-#include <mosaic/auto_configurer/connector/a_dc_handler_configurer.h>
 #include <mosaic/handlers/data_channel/data_channel_receivable.h>
 
 #include "geometry_msgs/msg/twist_stamped.hpp"
-#include "mosaic_ros2/ros2_connector_configurer.h"
+#include "mosaic_ros2/configurer/ros2_a_dc_handler_configurer.h"
 
 using SharedTwistStampedPublisher = std::shared_ptr<rclcpp::Publisher<geometry_msgs::msg::TwistStamped>>;
 
 namespace mosaic::ros2::geometry_connector {
-class TwistStampedConnectorConfigurer : public auto_configurer::ADCHandlerConfigurer, public ROS2ConnectorConfigurer {
+class TwistStampedConnectorConfigurer : public ROS2ADCHandlerConfigurer {
   public:
     TwistStampedConnectorConfigurer() = default;
 
