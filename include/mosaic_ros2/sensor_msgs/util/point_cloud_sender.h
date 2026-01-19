@@ -106,7 +106,7 @@ class PointCloud2Sender {
     void CollectLeafNodes(OctreeNode* node, std::vector<OctreeNode*>& leaf_nodes);
 
     std::unique_ptr<OctreeNode> BuildOctree(const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
-                                            LiDARStatisticMessage& statistic);
+                                            const std::shared_ptr<LiDARStatisticMessage>& statistic);
 
     void SubdivideNode(OctreeNode* node,
                        const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
@@ -114,7 +114,7 @@ class PointCloud2Sender {
 
     int GetOctant(float x, float y, float z, float mid_x, float mid_y, float mid_z) const;
 
-    void SendStatistic(const LiDARStatisticMessage& statistic);
+    void SendStatistic(const std::shared_ptr<LiDARStatisticMessage>& statistic);
 
     void SendData(const std::string& data);
 

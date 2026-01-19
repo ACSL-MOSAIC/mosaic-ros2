@@ -44,21 +44,20 @@ void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg
     std::lock_guard lock(send_mutex_);
 
     // Prepare statistics message
-    // TODO: make_shared
-    LiDARStatisticMessage statistic;
+    const auto statistic = std::make_shared<LiDARStatisticMessage>();
 
     // 1. Timestamp when frame is received
-    statistic.frame_received_timestamp = GetNow();
-    const long created_timestamp = statistic.frame_received_timestamp;
+    statistic->frame_received_timestamp = GetNow();
+    const long created_timestamp = statistic->frame_received_timestamp;
 
     // Create and send metadata first
     const auto ppc_meta = ExtractMeta(msg);
     const std::string frame_id = ppc_meta->frame_id();
-    statistic.frame_id = frame_id;
+    statistic->frame_id = frame_id;
     SendData(ppc_meta->SerializeAsString());
 
     // 2. Timestamp after sending metadata
-    statistic.metadata_sent_timestamp = GetNow();
+    statistic->metadata_sent_timestamp = GetNow();
 
     // Build octree
     const auto octree_root = BuildOctree(msg, statistic);
@@ -68,7 +67,7 @@ void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg
     CollectLeafNodes(octree_root.get(), leaf_nodes);
 
     // 3. Timestamp after building octree
-    statistic.octree_built_timestamp = GetNow();
+    statistic->octree_built_timestamp = GetNow();
 
     // TODO: Extract logic below into a function
 
@@ -129,7 +128,7 @@ void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg
             SendData(chunk.SerializeAsString());
 
             // Measure time after chunk sent
-            statistic.chunk_sent_timestamps.push_back(GetNow());
+            statistic->chunk_sent_timestamps.push_back(GetNow());
 
             ++chunk_idx;
         }
@@ -140,7 +139,7 @@ void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg
     }
 
     // 4. Timestamp after sending all chunks
-    statistic.all_chunks_sent_timestamp = GetNow();
+    statistic->all_chunks_sent_timestamp = GetNow();
 
     // Send statistics data
     SendStatistic(statistic);
@@ -373,7 +372,7 @@ void PointCloud2Sender::CollectLeafNodes(OctreeNode* node, std::vector<OctreeNod
 }
 
 std::unique_ptr<OctreeNode> PointCloud2Sender::BuildOctree(const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
-                                                           LiDARStatisticMessage& statistic) {
+                                                           const std::shared_ptr<LiDARStatisticMessage>& statistic) {
     // Step 1: Create root node (entire bounding box)
     auto root = std::make_unique<OctreeNode>();
     root->min_x = config_.min_x;
@@ -407,13 +406,13 @@ std::unique_ptr<OctreeNode> PointCloud2Sender::BuildOctree(const sensor_msgs::ms
     }
 
     // Time after root node creation
-    statistic.octree_root_node_built_timestamp = GetNow();
+    statistic->octree_root_node_built_timestamp = GetNow();
 
     // Step 3: Subdivide recursively and assign points
     SubdivideNode(root.get(), msg, root_point_indices);
 
     // Time after spatial subdivision
-    statistic.octree_subdivide_timestamp = GetNow();
+    statistic->octree_subdivide_timestamp = GetNow();
 
     return root;
 }
@@ -498,20 +497,20 @@ int PointCloud2Sender::GetOctant(const float x,
     return octant;
 }
 
-void PointCloud2Sender::SendStatistic(const LiDARStatisticMessage& statistic) {
+void PointCloud2Sender::SendStatistic(const std::shared_ptr<LiDARStatisticMessage>& statistic) {
     const auto ppcStatistic = std::make_shared<point_cloud_2::Statistic>();
 
     ppcStatistic->set_timestamp(GetNow());
-    ppcStatistic->set_frame_id(statistic.frame_id);
+    ppcStatistic->set_frame_id(statistic->frame_id);
 
-    ppcStatistic->set_frame_received_timestamp(statistic.frame_received_timestamp);
-    ppcStatistic->set_metadata_sent_timestamp(statistic.metadata_sent_timestamp);
-    ppcStatistic->set_octree_root_node_built_timestamp(statistic.octree_root_node_built_timestamp);
-    ppcStatistic->set_octree_subdivide_timestamp(statistic.octree_subdivide_timestamp);
-    ppcStatistic->set_octree_built_timestamp(statistic.octree_built_timestamp);
-    ppcStatistic->set_all_chunks_sent_timestamp(statistic.all_chunks_sent_timestamp);
+    ppcStatistic->set_frame_received_timestamp(statistic->frame_received_timestamp);
+    ppcStatistic->set_metadata_sent_timestamp(statistic->metadata_sent_timestamp);
+    ppcStatistic->set_octree_root_node_built_timestamp(statistic->octree_root_node_built_timestamp);
+    ppcStatistic->set_octree_subdivide_timestamp(statistic->octree_subdivide_timestamp);
+    ppcStatistic->set_octree_built_timestamp(statistic->octree_built_timestamp);
+    ppcStatistic->set_all_chunks_sent_timestamp(statistic->all_chunks_sent_timestamp);
 
-    for (const auto& ts : statistic.chunk_sent_timestamps) {
+    for (const auto& ts : statistic->chunk_sent_timestamps) {
         ppcStatistic->add_chunk_sent_timestamps(ts);
     }
 
