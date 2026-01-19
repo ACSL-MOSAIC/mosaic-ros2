@@ -5,7 +5,7 @@
 #ifndef MOSAIC_ROS2_TWIST_CONNECTOR_H
 #define MOSAIC_ROS2_TWIST_CONNECTOR_H
 
-#include <mosaic/auto_configurer/connector/i_dc_handler_configurer.h>
+#include <mosaic/auto_configurer/connector/a_dc_handler_configurer.h>
 #include <mosaic/handlers/data_channel/data_channel_receivable.h>
 
 #include "geometry_msgs/msg/twist.hpp"
@@ -15,7 +15,7 @@
 using SharedTwistPublisher = std::shared_ptr<rclcpp::Publisher<geometry_msgs::msg::Twist>>;
 
 namespace mosaic::ros2::geometry_connector {
-class TwistConnectorConfigurer : public auto_configurer::IDCHandlerConfigurer, public ROS2ConnectorConfigurer {
+class TwistConnectorConfigurer : public auto_configurer::ADCHandlerConfigurer, public ROS2ConnectorConfigurer {
   public:
     TwistConnectorConfigurer() = default;
 
