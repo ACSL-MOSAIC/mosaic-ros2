@@ -52,6 +52,7 @@ ament_target_dependencies(mosaic_geometry_msgs
 add_library(mosaic_sensor_msgs STATIC
         src/sensor_msgs/image_connector.cpp
         src/sensor_msgs/nav_sat_fix_connector.cpp
+        src/sensor_msgs/point_cloud2_connector.cpp
 )
 target_include_directories(mosaic_sensor_msgs PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

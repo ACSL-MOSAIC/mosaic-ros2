@@ -1,0 +1,46 @@
+//
+// Created by yhkim on 1/19/26.
+//
+
+#ifndef MOSAIC_ROS2_POINT_CLOUD_2_CONNECTOR_H
+#define MOSAIC_ROS2_POINT_CLOUD_2_CONNECTOR_H
+
+#include <mosaic/auto_configurer/connector/a_dc_handler_configurer.h>
+#include <mosaic/handlers/data_channel/data_channel_sendable.h>
+
+#include "mosaic_ros2/ros2_connector_configurer.h"
+#include "sensor_msgs/msg/point_cloud2.hpp"
+
+namespace mosaic::ros2::sensor_connector {
+class PointCloud2ConnectorConfigurer : public auto_configurer::ADCHandlerConfigurer, public ROS2ConnectorConfigurer {
+  public:
+    PointCloud2ConnectorConfigurer() = default;
+
+    std::string GetConnectorType() const override {
+        return "ros2-sender-sensor-PointCloud2";
+    }
+
+    void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector) override;
+
+    void Callback(sensor_msgs::msg::PointCloud2::SharedPtr msg);
+
+  private:
+    std::shared_ptr<rclcpp::Subscription<sensor_msgs::msg::PointCloud2>> subscription_;
+};
+
+class PointCloud2DataChannel : public handlers::DataChannelSendable {
+  public:
+    explicit PointCloud2DataChannel(const std::string& channel_name, const std::shared_ptr<MosaicNode>& mosaic_node)
+        : DataChannelSendable(channel_name), mosaic_node_(mosaic_node) {}
+
+    ~PointCloud2DataChannel() override = default;
+
+    void OnPointCloud2Received(const sensor_msgs::msg::PointCloud2::SharedPtr& point_cloud2);
+
+  private:
+    std::shared_ptr<MosaicNode> mosaic_node_;
+};
+
+}  // namespace mosaic::ros2::sensor_connector
+
+#endif  // MOSAIC_ROS2_POINT_CLOUD_2_CONNECTOR_H
