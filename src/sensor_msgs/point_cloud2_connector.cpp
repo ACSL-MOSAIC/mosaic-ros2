@@ -2,8 +2,11 @@
 // Created by yhkim on 1/19/26.
 //
 
+#include "mosaic_ros2/sensor_msgs/point_cloud2_connector.h"
+
 #include <json/json.h>
-#include <mosaic_ros2/sensor_msgs/point_cloud2_connector.h>
+
+#include "mosaic_ros2/sensor_msgs/util/point_cloud_sender.h"
 
 using namespace mosaic::ros2::sensor_connector;
 

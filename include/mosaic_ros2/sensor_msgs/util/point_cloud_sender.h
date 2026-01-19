@@ -6,9 +6,9 @@
 #define MOSAIC_ROS2_POINT_CLOUD_2_SENDER_H
 
 #include "mosaic_ros2/sensor_msgs/point_cloud2_connector.h"
-#include "pc2_chunk.pb.h"
-#include "pc2_meta.pb.h"
-#include "pc2_statistic.pb.h"
+#include "protobuf/pc2_chunk.pb.h"
+#include "protobuf/pc2_meta.pb.h"
+#include "protobuf/pc2_statistic.pb.h"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 
 namespace mosaic::ros2::sensor_connector {

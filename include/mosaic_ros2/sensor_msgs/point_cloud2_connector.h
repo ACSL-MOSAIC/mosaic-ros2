@@ -10,9 +10,10 @@
 
 #include "mosaic_ros2/ros2_connector_configurer.h"
 #include "sensor_msgs/msg/point_cloud2.hpp"
-#include "util/point_cloud_sender.h"
 
 namespace mosaic::ros2::sensor_connector {
+class PointCloud2Sender;
+
 class PointCloud2ConnectorConfigurer : public auto_configurer::AParallelDCHandlerConfigurer,
                                        public ROS2ConnectorConfigurer {
   public:
