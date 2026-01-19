@@ -7,11 +7,22 @@
 
 using namespace mosaic::ros2::sensor_connector;
 
-void PointCloud2ConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicConnector> mosaic_connector) {
+void PointCloud2ConnectorConfigurer::Configure() {
     MOSAIC_LOG_INFO("Configuring ROS2 sensor_msgs::PointCloud2 Connector...");
 
-    handler_ = std::make_shared<PointCloud2DataChannel>(connector_config_.label, mosaic_node_);
-    mosaic_connector->AddDataChannelHandler(handler_);
+    point_cloud2_sender_ = std::make_unique<PointCloud2Sender>(0.5);
+
+    int parallel_num = 1;
+    if (connector_config_.params.find("parallel_num") != connector_config_.params.end()) {
+        parallel_num = std::stoi(connector_config_.params.at("parallel_num"));
+    }
+
+    for (int i = 0; i < parallel_num; i++) {
+        const auto channel_label = connector_config_.label + "_" + std::to_string(i);
+        const auto handler = std::make_shared<PointCloud2DataChannel>(channel_label, mosaic_node_);
+        handlers_.push_back(handler);
+        point_cloud2_sender_->AddPointCloud2DataChannel(handler);
+    }
 
     subscription_ = mosaic_node_->create_subscription<sensor_msgs::msg::PointCloud2>(
         connector_config_.params.at("topic_name"),
@@ -25,21 +36,9 @@ void PointCloud2ConnectorConfigurer::Configure(const std::shared_ptr<core::Mosai
 void PointCloud2ConnectorConfigurer::Callback(sensor_msgs::msg::PointCloud2::SharedPtr msg) {
     MOSAIC_LOG_DEBUG("sensor_msgs::msg::PointCloud2 received");
 
-    if (handler_) {
-        if (const auto nav_sat_fix_handler = std::dynamic_pointer_cast<PointCloud2DataChannel>(handler_)) {
-            nav_sat_fix_handler->OnPointCloud2Received(msg);
-        }
+    try {
+        point_cloud2_sender_->Send(msg);
+    } catch (const std::exception& e) {
+        MOSAIC_LOG_ERROR("Failed to send PointCloud2: {}", e.what());
     }
-}
-
-void PointCloud2DataChannel::OnPointCloud2Received(const sensor_msgs::msg::PointCloud2::SharedPtr& point_cloud2) {
-    if (!Sendable()) {
-        MOSAIC_LOG_DEBUG("PointCloud2DataChannel Not Sendable!");
-        return;
-    }
-
-    const auto now = std::chrono::high_resolution_clock::now();
-    const auto timestamp = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
-
-    SendJson("coordinate_json");
 }

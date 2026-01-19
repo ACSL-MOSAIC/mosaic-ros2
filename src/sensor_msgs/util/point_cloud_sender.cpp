@@ -12,13 +12,15 @@
 #include <thread>
 #include <vector>
 
+#include <mosaic/handlers/data_channel/a_data_channel_handler.h>
 #include <uuid/uuid.h>
 
-ProgressivePointCloudSender::ProgressivePointCloudSender(float voxel_size)
-    : voxel_size_(voxel_size), max_channel_idx_(0) {}
+using namespace mosaic::ros2::sensor_connector;
 
-void ProgressivePointCloudSender::AddLiDARDataChannels(const std::shared_ptr<husky::LiDARDataChannel>& channel) {
-    lidar_data_channels_.push_back(channel);
+PointCloud2Sender::PointCloud2Sender(float voxel_size) : voxel_size_(voxel_size), max_channel_idx_(0) {}
+
+void PointCloud2Sender::AddPointCloud2DataChannel(const std::shared_ptr<PointCloud2DataChannel>& channel) {
+    point_cloud_2_data_channels_.push_back(channel);
     max_channel_idx_++;
 }
 
@@ -27,7 +29,7 @@ long GetNow() {
     return std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
 }
 
-void ProgressivePointCloudSender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) {
+void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) {
     // 최초 프레임 초기화
     if (!initialized_) {
         Initialize(msg);
@@ -117,7 +119,7 @@ void ProgressivePointCloudSender::Send(const sensor_msgs::msg::PointCloud2::Shar
         if (!chunk_buffer.empty()) {
             const size_t chunk_point_count = chunk_buffer.size() / point_step;
 
-            ppc_chunk::PPCChunk chunk;
+            point_cloud_2::Chunk chunk;
             chunk.set_timestamp(created_timestamp);
             chunk.set_frame_id(frame_id);
             chunk.set_chunk_index(chunk_idx);
@@ -144,11 +146,11 @@ void ProgressivePointCloudSender::Send(const sensor_msgs::msg::PointCloud2::Shar
     SendStatistic(statistic);
 }
 
-bool ProgressivePointCloudSender::IsAllChannelReady() const {
-    if (lidar_data_channels_.empty()) {
+bool PointCloud2Sender::IsAllChannelReady() const {
+    if (point_cloud_2_data_channels_.empty()) {
         return false;
     }
-    for (const auto& channel : lidar_data_channels_) {
+    for (const auto& channel : point_cloud_2_data_channels_) {
         if (channel->Sendable()) {
             return true;
         }
@@ -156,14 +158,14 @@ bool ProgressivePointCloudSender::IsAllChannelReady() const {
     return false;
 }
 
-std::shared_ptr<husky::LiDARDataChannel> ProgressivePointCloudSender::GetNextChannel() {
+std::shared_ptr<PointCloud2DataChannel> PointCloud2Sender::GetNextChannel() {
     channel_idx_++;
     channel_idx_ %= max_channel_idx_;
-    if (lidar_data_channels_[channel_idx_]->GetState() == ADataChannelHandler::kUnknown) {
+    if (point_cloud_2_data_channels_[channel_idx_]->GetState() == handlers::ADataChannelHandler::kUnknown) {
         return nullptr;
     }
-    if (lidar_data_channels_[channel_idx_]->Sendable()) {
-        return lidar_data_channels_[channel_idx_];
+    if (point_cloud_2_data_channels_[channel_idx_]->Sendable()) {
+        return point_cloud_2_data_channels_[channel_idx_];
     }
     // 0.1 ms sleep
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -178,9 +180,9 @@ std::string GenerateUUID() {
     return std::string(uuid_str);
 }
 
-std::shared_ptr<ppc_meta::PPCMeta> ProgressivePointCloudSender::ExtractMeta(
+std::shared_ptr<point_cloud_2::Meta> PointCloud2Sender::ExtractMeta(
     const sensor_msgs::msg::PointCloud2::SharedPtr& msg) const {
-    auto meta = std::make_shared<ppc_meta::PPCMeta>();
+    auto meta = std::make_shared<point_cloud_2::Meta>();
 
     meta->set_timestamp(GetNow());
 
@@ -213,10 +215,10 @@ std::shared_ptr<ppc_meta::PPCMeta> ProgressivePointCloudSender::ExtractMeta(
     return meta;
 }
 
-bool ProgressivePointCloudSender::FindXYZOffsets(const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
-                                                 unsigned int& x_offset,
-                                                 unsigned int& y_offset,
-                                                 unsigned int& z_offset) const {
+bool PointCloud2Sender::FindXYZOffsets(const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
+                                       unsigned int& x_offset,
+                                       unsigned int& y_offset,
+                                       unsigned int& z_offset) const {
     bool found_x = false, found_y = false, found_z = false;
 
     for (const auto& field : msg->fields) {
@@ -235,7 +237,7 @@ bool ProgressivePointCloudSender::FindXYZOffsets(const sensor_msgs::msg::PointCl
     return found_x && found_y && found_z;
 }
 
-void ProgressivePointCloudSender::Initialize(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) {
+void PointCloud2Sender::Initialize(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) {
     // XYZ offsets 찾기
     if (!FindXYZOffsets(msg, config_.x_offset, config_.y_offset, config_.z_offset)) {
         throw std::runtime_error("Failed to find XYZ fields in PointCloud2 message");
@@ -264,7 +266,7 @@ void ProgressivePointCloudSender::Initialize(const sensor_msgs::msg::PointCloud2
     initialized_ = true;
 }
 
-void ProgressivePointCloudSender::ComputeBoundingBox(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) {
+void PointCloud2Sender::ComputeBoundingBox(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) {
     const uint32_t point_step = msg->point_step;
     const uint8_t* data_ptr = msg->data.data();
     const size_t total_points = msg->width * msg->height;
@@ -324,13 +326,13 @@ void ProgressivePointCloudSender::ComputeBoundingBox(const sensor_msgs::msg::Poi
     config_.down = -config_.min_z;      // 아래쪽 (z축 음의 방향)
 }
 
-void ProgressivePointCloudSender::SendData(const std::string& data) {
+void PointCloud2Sender::SendData(const std::string& data) {
     if (const auto channel = GetNextChannel(); channel != nullptr) {
         channel->SendStringAsByte(data, false);
     }
 }
 
-OctreeNode* ProgressivePointCloudSender::FindLeafNode(OctreeNode* node, const float x, const float y, const float z) {
+OctreeNode* PointCloud2Sender::FindLeafNode(OctreeNode* node, const float x, const float y, const float z) {
     // Leaf 노드면 반환
     if (node->is_leaf()) {
         return node;
@@ -354,7 +356,7 @@ OctreeNode* ProgressivePointCloudSender::FindLeafNode(OctreeNode* node, const fl
     return FindLeafNode(node->children[octant].get(), x, y, z);
 }
 
-void ProgressivePointCloudSender::CollectLeafNodes(OctreeNode* node, std::vector<OctreeNode*>& leaf_nodes) {
+void PointCloud2Sender::CollectLeafNodes(OctreeNode* node, std::vector<OctreeNode*>& leaf_nodes) {
     if (node->is_leaf()) {
         // Leaf 노드만 수집 (포인트가 있는 경우)
         if (!node->point_indices.empty()) {
@@ -370,9 +372,8 @@ void ProgressivePointCloudSender::CollectLeafNodes(OctreeNode* node, std::vector
     }
 }
 
-std::unique_ptr<OctreeNode> ProgressivePointCloudSender::BuildOctree(
-    const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
-    LiDARStatisticMessage& statistic) {
+std::unique_ptr<OctreeNode> PointCloud2Sender::BuildOctree(const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
+                                                           LiDARStatisticMessage& statistic) {
     // 1단계: 루트 노드 생성 (전체 bounding box)
     auto root = std::make_unique<OctreeNode>();
     root->min_x = config_.min_x;
@@ -417,9 +418,9 @@ std::unique_ptr<OctreeNode> ProgressivePointCloudSender::BuildOctree(
     return root;
 }
 
-void ProgressivePointCloudSender::SubdivideNode(OctreeNode* node,
-                                                const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
-                                                const std::vector<size_t>& point_indices) {
+void PointCloud2Sender::SubdivideNode(OctreeNode* node,
+                                      const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
+                                      const std::vector<size_t>& point_indices) {
     // 분할 중단 조건 1: 포인트가 10개 이하
     constexpr size_t MIN_POINTS_TO_SUBDIVIDE = 10;
     if (point_indices.size() <= MIN_POINTS_TO_SUBDIVIDE) {
@@ -481,12 +482,12 @@ void ProgressivePointCloudSender::SubdivideNode(OctreeNode* node,
     }
 }
 
-int ProgressivePointCloudSender::GetOctant(const float x,
-                                           const float y,
-                                           const float z,
-                                           const float mid_x,
-                                           const float mid_y,
-                                           const float mid_z) const {
+int PointCloud2Sender::GetOctant(const float x,
+                                 const float y,
+                                 const float z,
+                                 const float mid_x,
+                                 const float mid_y,
+                                 const float mid_z) const {
     int octant = 0;
     if (x >= mid_x)
         octant |= 1;
@@ -497,8 +498,8 @@ int ProgressivePointCloudSender::GetOctant(const float x,
     return octant;
 }
 
-void ProgressivePointCloudSender::SendStatistic(const LiDARStatisticMessage& statistic) {
-    const auto ppcStatistic = std::make_shared<ppc_statistic::PPCStatistic>();
+void PointCloud2Sender::SendStatistic(const LiDARStatisticMessage& statistic) {
+    const auto ppcStatistic = std::make_shared<point_cloud_2::Statistic>();
 
     ppcStatistic->set_timestamp(GetNow());
     ppcStatistic->set_frame_id(statistic.frame_id);

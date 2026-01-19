@@ -7,14 +7,13 @@
 
 using namespace mosaic::ros2::geometry_connector;
 
-void TwistConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicConnector> mosaic_connector) {
+void TwistConnectorConfigurer::Configure() {
     MOSAIC_LOG_INFO("Configuring ROS2 geometry_msgs::Twist Connector...");
 
     publisher_ =
         mosaic_node_->create_publisher<geometry_msgs::msg::Twist>(connector_config_.params.at("topic_name"), 10);
 
     handler_ = std::make_shared<TwistDataChannel>(connector_config_.label, publisher_);
-    mosaic_connector->AddDataChannelHandler(handler_);
 
     mosaic_node_->AddPublisher(publisher_);
 }

@@ -23,7 +23,7 @@ class TwistConnectorConfigurer : public auto_configurer::ADCHandlerConfigurer, p
         return "ros2-receiver-geometry-Twist";
     }
 
-    void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector) override;
+    void Configure() override;
 
   private:
     SharedTwistPublisher publisher_;

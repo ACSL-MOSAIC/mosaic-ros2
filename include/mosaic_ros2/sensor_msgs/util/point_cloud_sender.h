@@ -7,10 +7,13 @@
 
 #include <utility>
 
+#include "mosaic_ros2/sensor_msgs/point_cloud2_connector.h"
 #include "pc2_chunk.pb.h"
 #include "pc2_meta.pb.h"
+#include "pc2_statistic.pb.h"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 
+namespace mosaic::ros2::sensor_connector {
 // Octree 노드 구조
 struct OctreeNode {
     // 공간 범위
@@ -76,20 +79,20 @@ struct LiDARStatisticMessage {
     std::vector<long> chunk_sent_timestamps;  // 각 청크가 전송된 시간
 };
 
-class ProgressivePointCloudSender {
+class PointCloud2Sender {
   public:
-    explicit ProgressivePointCloudSender(float voxel_size);
+    explicit PointCloud2Sender(float voxel_size);
 
-    void AddLiDARDataChannels(const std::shared_ptr<husky::LiDARDataChannel>& channel);
+    void AddPointCloud2DataChannel(const std::shared_ptr<PointCloud2DataChannel>& channel);
 
     void Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg);
 
   private:
     bool IsAllChannelReady() const;
 
-    std::shared_ptr<husky::LiDARDataChannel> GetNextChannel();
+    std::shared_ptr<PointCloud2DataChannel> GetNextChannel();
 
-    std::shared_ptr<ppc_meta::PPCMeta> ExtractMeta(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) const;
+    std::shared_ptr<point_cloud_2::Meta> ExtractMeta(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) const;
 
     void Initialize(const sensor_msgs::msg::PointCloud2::SharedPtr& msg);
 
@@ -127,7 +130,8 @@ class ProgressivePointCloudSender {
     int channel_idx_ = 0;
     int max_channel_idx_;
 
-    std::vector<std::shared_ptr<husky::LiDARDataChannel>> lidar_data_channels_;
+    std::vector<std::shared_ptr<PointCloud2DataChannel>> point_cloud_2_data_channels_;
 };
+}  // namespace mosaic::ros2::sensor_connector
 
 #endif  // MOSAIC_ROS2_POINT_CLOUD_2_SENDER_H

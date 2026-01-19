@@ -12,11 +12,10 @@
 
 using namespace mosaic::ros2::sensor_connector;
 
-void ImageConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicConnector> mosaic_connector) {
+void ImageConnectorConfigurer::Configure() {
     MOSAIC_LOG_INFO("Configuring ROS2 sensor_msgs::Image Connector...");
 
     handler_ = std::make_shared<ImageMediaTrack>(connector_config_.label, mosaic_node_);
-    mosaic_connector->AddMediaTrackHandler(handler_);
 
     const auto subscription = mosaic_node_->create_subscription<sensor_msgs::msg::Image>(
         connector_config_.params.at("topic_name"),

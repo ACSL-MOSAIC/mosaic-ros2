@@ -43,6 +43,7 @@ endif ()
 set(PROTO_FILES
         protobuf/pc2_meta.proto
         protobuf/pc2_chunk.proto
+        protobuf/pc2_statistic.proto
 )
 
 # Set custom output directory for protobuf generated files

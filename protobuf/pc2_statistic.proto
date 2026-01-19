@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package point_cloud_2;
+
+message Statistic {
+  double timestamp = 1;
+  string frame_id = 2;
+
+  double frame_received_timestamp = 3;
+  double metadata_sent_timestamp = 4;
+  double octree_root_node_built_timestamp = 5;
+  double octree_subdivide_timestamp = 6;
+  double octree_built_timestamp = 7;
+  double all_chunks_sent_timestamp = 8;
+
+  repeated double chunk_sent_timestamps = 9;
+}
