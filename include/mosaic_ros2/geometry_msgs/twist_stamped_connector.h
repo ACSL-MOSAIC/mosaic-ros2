@@ -22,7 +22,7 @@ class TwistStampedConnectorConfigurer : public auto_configurer::ADCHandlerConfig
         return "ros2-receiver-geometry-TwistStamped";
     }
 
-    void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector) override;
+    void Configure() override;
 
   private:
     SharedTwistStampedPublisher publisher_;

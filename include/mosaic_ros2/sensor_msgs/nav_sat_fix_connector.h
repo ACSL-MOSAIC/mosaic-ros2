@@ -20,7 +20,7 @@ class NavSatFixConnectorConfigurer : public auto_configurer::ADCHandlerConfigure
         return "ros2-sender-sensor-NavSatFix";
     }
 
-    void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector) override;
+    void Configure() override;
 
     void Callback(sensor_msgs::msg::NavSatFix::SharedPtr msg);
 

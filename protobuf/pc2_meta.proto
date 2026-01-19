@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package point_cloud_2;
+
+message PointField {
+  string name = 1;
+  uint32 offset = 2;
+  uint32 datatype = 3;
+  uint32 count = 4;
+}
+
+message Meta {
+  double timestamp = 1;
+  string frame_id = 2;
+
+  uint32 height = 3;
+  uint32 width = 4;
+
+  bool is_bigendian = 5;
+  uint32 point_step = 6;
+  uint32 row_step = 7;
+  bool is_dense = 8;
+
+  double min_x = 9;
+  double max_x = 10;
+  double min_y = 11;
+  double max_y = 12;
+  double min_z = 13;
+  double max_z = 14;
+
+  repeated PointField fields = 15;
+}

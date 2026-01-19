@@ -22,7 +22,7 @@ class ImageConnectorConfigurer : public auto_configurer::AMTHandlerConfigurer, p
         return "ros2-sender-sensor-Image";
     }
 
-    void Configure(std::shared_ptr<core::MosaicConnector> mosaic_connector) override;
+    void Configure() override;
 
     void Callback(sensor_msgs::msg::Image::SharedPtr msg);
 

@@ -7,11 +7,10 @@
 
 using namespace mosaic::ros2::sensor_connector;
 
-void NavSatFixConnectorConfigurer::Configure(const std::shared_ptr<core::MosaicConnector> mosaic_connector) {
+void NavSatFixConnectorConfigurer::Configure() {
     MOSAIC_LOG_INFO("Configuring ROS2 sensor_msgs::NavSatFix Connector...");
 
     handler_ = std::make_shared<NavSatFixDataChannel>(connector_config_.label, mosaic_node_);
-    mosaic_connector->AddDataChannelHandler(handler_);
 
     subscription_ = mosaic_node_->create_subscription<sensor_msgs::msg::NavSatFix>(
         connector_config_.params.at("topic_name"),
