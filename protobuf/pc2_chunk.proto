@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package point_cloud_2;
+
+message Chunk {
+  double timestamp = 1;
+  string frame_id = 2;
+
+  uint32 chunk_index = 3;
+  uint32 point_size = 4;
+  bytes data = 5;
+  bool is_last_chunk = 6;
+}

@@ -8,7 +8,6 @@ endif ()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(mosaic-rtc-core REQUIRED)
-find_package(mosaic-auto-configurer REQUIRED)
 
 find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
 
@@ -17,6 +16,14 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
+
+find_package(Protobuf REQUIRED)
+if (NOT Protobuf_PROTOC_EXECUTABLE)
+    message(FATAL_ERROR "protoc executable not found!")
+endif ()
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(UUID REQUIRED uuid)
 
 # Read ROS_DISTRO environment variable
 if (DEFINED ENV{ROS_DISTRO})
@@ -33,6 +40,37 @@ else ()
     message(WARNING "ROS_DISTRO environment variable not set")
 endif ()
 
+set(PROTO_FILES
+        protobuf/pc2_meta.proto
+        protobuf/pc2_chunk.proto
+)
+
+# Set custom output directory for protobuf generated files
+set(PROTO_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(PROTO_INCLUDE_DIR ${PROTO_OUTPUT_DIR}/protobuf)
+file(MAKE_DIRECTORY ${PROTO_OUTPUT_DIR})
+
+# Manually generate protobuf files with custom output directory
+set(PROTO_SRCS)
+set(PROTO_HDRS)
+foreach (PROTO_FILE ${PROTO_FILES})
+    get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
+    list(APPEND PROTO_SRCS ${PROTO_OUTPUT_DIR}/protobuf/${PROTO_NAME}.pb.cc)
+    list(APPEND PROTO_HDRS ${PROTO_OUTPUT_DIR}/protobuf/${PROTO_NAME}.pb.h)
+endforeach ()
+
+# Generate C++ source files from .proto files
+add_custom_command(
+        OUTPUT ${PROTO_SRCS} ${PROTO_HDRS}
+        COMMAND ${Protobuf_PROTOC_EXECUTABLE}
+        --cpp_out=${PROTO_OUTPUT_DIR}
+        --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
+        ${PROTO_FILES}
+        DEPENDS ${PROTO_FILES}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating protobuf C++ files in proto_gen"
+)
+
 add_library(mosaic_geometry_msgs STATIC
         src/geometry_msgs/twist_connector.cpp
         src/geometry_msgs/twist_stamped_connector.cpp
@@ -42,7 +80,7 @@ target_include_directories(mosaic_geometry_msgs PUBLIC
         $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 target_link_libraries(mosaic_geometry_msgs
-        mosaic::mosaic-auto-configurer
+        mosaic::mosaic-rtc-core
 )
 ament_target_dependencies(mosaic_geometry_msgs
         rclcpp
@@ -53,18 +91,24 @@ add_library(mosaic_sensor_msgs STATIC
         src/sensor_msgs/image_connector.cpp
         src/sensor_msgs/nav_sat_fix_connector.cpp
         src/sensor_msgs/point_cloud2_connector.cpp
+        src/sensor_msgs/util/point_cloud_sender.cpp
+        ${PROTO_SRCS}
 )
 target_include_directories(mosaic_sensor_msgs PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+        ${UUID_INCLUDE_DIRS}
+        ${PROTO_INCLUDE_DIR}
 )
 target_link_libraries(mosaic_sensor_msgs
-        mosaic::mosaic-auto-configurer
+        mosaic::mosaic-rtc-core
+        ${UUID_LIBRARIES}
 )
 ament_target_dependencies(mosaic_sensor_msgs
         rclcpp
         sensor_msgs
         cv_bridge
+        Protobuf
 )
 
 add_executable(mosaic-ros2
@@ -77,7 +121,6 @@ target_link_libraries(mosaic-ros2
         mosaic_sensor_msgs
         mosaic_geometry_msgs
         mosaic::mosaic-rtc-core
-        mosaic::mosaic-auto-configurer
 )
 
 target_include_directories(mosaic-ros2 PUBLIC
