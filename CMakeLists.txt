@@ -7,7 +7,7 @@ endif ()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(mosaic-rtc-core REQUIRED)
+find_package(mosaic-core REQUIRED)
 
 find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
 
@@ -47,8 +47,8 @@ set(PROTO_FILES
 )
 
 # Set custom output directory for protobuf generated files
-set(PROTO_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
-set(PROTO_INCLUDE_DIR ${PROTO_OUTPUT_DIR}/protobuf)
+set(PROTO_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/proto_gen)
+set(PROTO_INCLUDE_DIR ${PROTO_OUTPUT_DIR})
 file(MAKE_DIRECTORY ${PROTO_OUTPUT_DIR})
 
 # Manually generate protobuf files with custom output directory
@@ -81,7 +81,7 @@ target_include_directories(mosaic_geometry_msgs PUBLIC
         $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 target_link_libraries(mosaic_geometry_msgs
-        mosaic::mosaic-rtc-core
+        mosaic::mosaic-core
 )
 ament_target_dependencies(mosaic_geometry_msgs
         rclcpp
@@ -102,7 +102,7 @@ target_include_directories(mosaic_sensor_msgs PUBLIC
         ${PROTO_INCLUDE_DIR}
 )
 target_link_libraries(mosaic_sensor_msgs
-        mosaic::mosaic-rtc-core
+        mosaic::mosaic-core
         ${UUID_LIBRARIES}
 )
 ament_target_dependencies(mosaic_sensor_msgs
@@ -121,7 +121,7 @@ add_executable(mosaic-ros2
 target_link_libraries(mosaic-ros2
         mosaic_sensor_msgs
         mosaic_geometry_msgs
-        mosaic::mosaic-rtc-core
+        mosaic::mosaic-core
 )
 
 target_include_directories(mosaic-ros2 PUBLIC
