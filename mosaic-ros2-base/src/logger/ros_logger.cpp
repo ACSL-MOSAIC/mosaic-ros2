@@ -2,7 +2,7 @@
 // Created by yhkim on 1/1/26.
 //
 
-#include "mosaic_ros2/logger/ros_logger.h"
+#include "mosaic-ros2-base/logger/ros_logger.h"
 
 using namespace mosaic;
 

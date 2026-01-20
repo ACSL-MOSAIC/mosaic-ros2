@@ -2,8 +2,8 @@
 // Created by yhkim on 1/2/26.
 //
 
-#include <mosaic_ros2/configurer/ros2_auto_configurer.h>
-#include <mosaic_ros2/configurer/ros2_connector_configurer.h>
+#include <mosaic-ros2-base/configurer/ros2_auto_configurer.h>
+#include <mosaic-ros2-base/configurer/ros2_connector_configurer.h>
 
 using namespace mosaic::ros2;
 

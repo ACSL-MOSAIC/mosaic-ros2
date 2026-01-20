@@ -2,7 +2,7 @@
 // Created by yhkim on 1/1/26.
 //
 
-#include "mosaic_ros2/node/mosaic_node.h"
+#include "mosaic-ros2-base/node/mosaic_node.h"
 
 #include "rclcpp/node.hpp"
 
