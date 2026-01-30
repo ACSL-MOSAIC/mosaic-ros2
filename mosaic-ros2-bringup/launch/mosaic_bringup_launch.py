@@ -16,7 +16,8 @@ def generate_launch_description():
     mosaic_node = Node(
         package='mosaic-ros2-bringup',
         executable='mosaic-ros2-bringup',
-        name='mosaic-ros2-bringup',
+        name='mosaic_ros2_bringup',
+        # prefix=['gdbserver localhost:3000'],
         parameters=[{
             'mosaic_config': LaunchConfiguration('mosaic_config'),
             'mosaic_log_level': LaunchConfiguration('mosaic_log_level'),
