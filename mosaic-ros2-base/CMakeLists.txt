@@ -22,6 +22,8 @@ add_library(mosaic-ros2-base STATIC
 )
 target_link_libraries(mosaic-ros2-base
         mosaic::mosaic-core
+        OpenSSL::SSL
+        OpenSSL::Crypto
 )
 
 target_include_directories(mosaic-ros2-base PUBLIC
@@ -47,7 +49,7 @@ install(DIRECTORY include/
 )
 
 ament_export_include_directories(include)
-ament_export_dependencies(rclcpp std_msgs mosaic-core)
+ament_export_dependencies(rclcpp std_msgs mosaic-core OpenSSL)
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
 if (BUILD_TESTING)

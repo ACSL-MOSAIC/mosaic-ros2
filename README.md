@@ -40,7 +40,7 @@ mosaic-ros2/
 - [mosaic-core](https://github.com/ACSL-MOSAIC/mosaic-core)
 - ROS2 packages: `rclcpp`, `sensor_msgs`, `geometry_msgs`, `cv_bridge`
 - System libraries: `libjsoncpp-dev`, `libssl-dev`, `libboost-all-dev`, `libopencv-dev`, `libwebsocketpp-dev`,
-  `libcpprest-dev`, `libfmt-dev`, `libprotobuf-dev`, `uuid-dev`
+  `libcpprest-dev`, `libfmt-dev`, `libprotobuf-dev`, `uuid-dev`, `libyaml-cpp-dev`
 
 ## Building from Source
 
@@ -57,7 +57,7 @@ Follow the official ROS2 installation guide:
 sudo apt update
 sudo apt install -y \
     libjsoncpp-dev libssl-dev libboost-all-dev libopencv-dev \
-    libwebsocketpp-dev libcpprest-dev libfmt-dev libprotobuf-dev uuid-dev
+    libwebsocketpp-dev libcpprest-dev libfmt-dev libprotobuf-dev uuid-dev libyaml-cpp-dev
 ```
 
 ### 3. Install mosaic-core
@@ -144,7 +144,7 @@ docker build -f dockerfiles/Dockerfile-humble-rosbag-simulator \
 ```bash
 docker run -it \
     -v /path/to/your/config.yaml:/root/mosaic_config/config.yaml \
-    mosaic-rosbag-sim:jazzy
+    mosaic-rosbag-sim:jazzy # or mosaic-rosbag-sim:humble
 ```
 
 **With rosbag playback:**
@@ -153,7 +153,7 @@ docker run -it \
 docker run -it \
     -v /path/to/your/config.yaml:/root/mosaic_config/config.yaml \
     -v /path/to/your/rosbag:/root/rosbag \
-    mosaic-rosbag-sim:jazzy
+    mosaic-rosbag-sim:jazzy # or mosaic-rosbag-sim:humble
 ```
 
 **With custom config path (using environment variable):**
@@ -162,7 +162,7 @@ docker run -it \
 docker run -it \
     -v /path/to/your/config.yaml:/root/config.yaml \
     -e MOSAIC_CONFIG_PATH=/root/config.yaml \
-    mosaic-rosbag-sim:jazzy
+    mosaic-rosbag-sim:jazzy # or mosaic-rosbag-sim:humble
 ```
 
 **Recommended: Full example with rosbag and config:**
@@ -171,7 +171,7 @@ docker run -it \
 docker run -it \
     -v /path/to/your/config.yaml:/root/mosaic_config/config.yaml \
     -v /path/to/your/rosbag:/root/rosbag \
-    mosaic-rosbag-sim:jazzy
+    mosaic-rosbag-sim:jazzy # or mosaic-rosbag-sim:humble
 ```
 
 If you need to connect to `localhost`, update your domain to use `host.docker.internal` instead, then run:
@@ -181,7 +181,7 @@ docker run -it \
     -v /path/to/your/config.yaml:/root/mosaic_config/config.yaml \
     -v /path/to/your/rosbag:/root/rosbag \
     --add-host=host.docker.internal:host-gateway \
-    mosaic-rosbag-sim:jazzy
+    mosaic-rosbag-sim:jazzy # or mosaic-rosbag-sim:humble
 ```
 
 ### Docker Features

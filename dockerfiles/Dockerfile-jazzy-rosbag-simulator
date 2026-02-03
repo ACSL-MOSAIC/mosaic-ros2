@@ -13,7 +13,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get install -y tzdata
 
 # Install Libraries for mosaic-core
-RUN apt install libjsoncpp-dev libssl-dev libboost-all-dev libopencv-dev libwebsocketpp-dev libcpprest-dev libfmt-dev libprotobuf-dev uuid-dev -y
+RUN apt install libjsoncpp-dev libssl-dev libboost-all-dev libopencv-dev libwebsocketpp-dev libcpprest-dev libfmt-dev libprotobuf-dev uuid-dev libyaml-cpp-dev -y
 
 # Install mosaic-core
 RUN git clone https://github.com/ACSL-MOSAIC/mosaic-core.git /root/mosaic-core
