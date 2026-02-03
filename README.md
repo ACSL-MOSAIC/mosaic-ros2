@@ -165,12 +165,22 @@ docker run -it \
     mosaic-rosbag-sim:jazzy
 ```
 
-**Recommended: Full example with network host, rosbag and config:**
+**Recommended: Full example with rosbag and config:**
 
 ```bash
-docker run -it --network host \
+docker run -it \
     -v /path/to/your/config.yaml:/root/mosaic_config/config.yaml \
     -v /path/to/your/rosbag:/root/rosbag \
+    mosaic-rosbag-sim:jazzy
+```
+
+If you need to connect to `localhost`, update your domain to use `host.docker.internal` instead, then run:
+
+```bash
+docker run -it \
+    -v /path/to/your/config.yaml:/root/mosaic_config/config.yaml \
+    -v /path/to/your/rosbag:/root/rosbag \
+    --add-host=host.docker.internal:host-gateway \
     mosaic-rosbag-sim:jazzy
 ```
 
