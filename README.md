@@ -15,7 +15,7 @@ geometry messages over WebRTC.
 mosaic-ros2/
 ├── mosaic-ros2-base/       # Core MOSAIC-ROS2 interfaces and base classes
 ├── mosaic-ros2-geometry/   # Geometry message connectors (Twist, Pose, etc.)
-├── mosaic-ros2-sensor/     # Sensor message connectors (Image, PointCloud2, NavSatFix)
+├── mosaic-ros2-sensor/     # Sensor message connectors (Image, PointCloud2, etc.)
 ├── mosaic-ros2-bringup/    # Launch files and main executable
 └── dockerfiles/            # Docker configurations for Jazzy and Humble
 ```
@@ -24,7 +24,7 @@ mosaic-ros2/
 
 - **mosaic-ros2-base**: Provides base classes and utilities for MOSAIC-ROS2 integration with mosaic-core
 - **mosaic-ros2-geometry**: Handles ROS2 geometry messages (Twist, Pose, etc.) for WebRTC streaming
-- **mosaic-ros2-sensor**: Handles ROS2 sensor messages (Image, PointCloud2, NavSatFix) for WebRTC streaming
+- **mosaic-ros2-sensor**: Handles ROS2 sensor messages (Image, PointCloud2, etc.) for WebRTC streaming
 - **mosaic-ros2-bringup**: Main launch package to bring up the MOSAIC-ROS2 system
 
 ## Requirements
