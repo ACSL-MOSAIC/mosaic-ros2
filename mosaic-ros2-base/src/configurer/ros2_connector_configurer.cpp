@@ -6,10 +6,10 @@
 
 using namespace mosaic::ros2;
 
-void ROS2ConnectorConfigurer::ValidateROS2Config(const core::ConnectorConfig& connector_config) {
+void ROS2ConnectorConfigurer::ValidateROS2Config(const std::shared_ptr<core::ConnectorConfig> &connector_config) {
     // check if connector_config.params has "topic_name" for subscribe/publish
-    const auto it = connector_config.params.find("topic_name");
-    if (it == connector_config.params.end()) {
+    const auto it = connector_config->params.find("topic_name");
+    if (it == connector_config->params.end()) {
         throw std::invalid_argument("ROS2 connector requires 'topic_name' parameter");
     }
 

@@ -10,44 +10,36 @@
 
 #include "geometry_msgs/msg/twist.hpp"
 
-using SharedTwistPublisher = std::shared_ptr<rclcpp::Publisher<geometry_msgs::msg::Twist>>;
+using SharedTwistPublisher = std::shared_ptr<rclcpp::Publisher<geometry_msgs::msg::Twist> >;
 
 namespace mosaic::ros2::geometry_connector {
-class TwistConnectorConfigurer : public ROS2ADCHandlerConfigurer {
-  public:
-    TwistConnectorConfigurer() = default;
+    class TwistConnectorConfigurer : public ROS2ADCHandlerConfigurer {
+    public:
+        TwistConnectorConfigurer() = default;
 
-    std::string GetConnectorType() const override {
-        return "ros2-receiver-geometry-Twist";
-    }
+        std::string GetConnectorType() const override {
+            return "ros2-receiver-geometry-Twist";
+        }
 
-    void Configure() override;
+        void Configure() override;
 
-  private:
-    SharedTwistPublisher publisher_;
-};
+    private:
+        SharedTwistPublisher publisher_;
+    };
 
-struct TwistMessage {
-    std::string direction;
-};
+    class TwistDataChannel : public handlers::DataChannelJsonReceivable {
+    public:
+        explicit TwistDataChannel(const std::string &channel_name, const SharedTwistPublisher &publisher)
+            : DataChannelJsonReceivable(channel_name), publisher_(publisher) {
+        }
 
-class TwistDataChannel : public handlers::DataChannelReceivable<TwistMessage> {
-  public:
-    explicit TwistDataChannel(const std::string& channel_name, const SharedTwistPublisher& publisher)
-        : DataChannelReceivable(channel_name), publisher_(publisher) {}
+        ~TwistDataChannel() override = default;
 
-    ~TwistDataChannel() override = default;
+        void HandleData(const Json::Value &data) override;
 
-    TwistMessage ConvertJsonToData(const Json::Value& json_data) override;
-
-    void HandleData(const TwistMessage& data) override;
-
-    void SendTwist(const double& linear_x, const double& angular_z) const;
-
-  private:
-    SharedTwistPublisher publisher_;
-};
-
-}  // namespace mosaic::ros2::geometry_connector
+    private:
+        SharedTwistPublisher publisher_;
+    };
+} // namespace mosaic::ros2::geometry_connector
 
 #endif  // MOSAIC_ROS2_TWIST_CONNECTOR_H
