@@ -1,13 +1,11 @@
-#include <mosaic/auto_configurer/config_reader/config_reader_resolver.h>
-#include <mosaic/auto_configurer/config_reader/yaml_config_reader.h>
-#include <mosaic/auto_configurer/connector/connector_resolver.h>
-#include <mosaic/logger/logger.h>
+#include <mosaic/auto_configurer/connector/connector_resolver.hpp>
+#include <mosaic/logger/logger.hpp>
 
-#include "mosaic-ros2-base/configurer/ros2_auto_configurer.h"
-#include "mosaic-ros2-base/logger/ros_logger.h"
-#include "mosaic-ros2-base/node/mosaic_node.h"
-#include "mosaic-ros2-geometry/register.h"
-#include "mosaic-ros2-sensor/register.h"
+#include "mosaic-ros2-base/configurer/ros2_auto_configurer.hpp"
+#include "mosaic-ros2-base/logger/ros_logger.hpp"
+#include "mosaic-ros2-base/node/mosaic_node.hpp"
+#include "mosaic-ros2-geometry/register.hpp"
+#include "mosaic-ros2-sensor/register.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 std::atomic<bool> shutdown_flag(false);
@@ -34,9 +32,6 @@ void SetWebRTCLog(const std::shared_ptr<Parameters> &parameters);
 int main(int argc, char **argv) {
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
-
-    mosaic::auto_configurer::ConfigReaderResolver::GetInstance()
-            .RegisterConfigReader<mosaic::auto_configurer::YamlConfigReader>();
 
     AutoRegisterConnectors();
 

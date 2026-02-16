@@ -2,9 +2,8 @@
 // Created by yhkim on 2/8/26.
 //
 
-#include <json/json.h>
-#include <mosaic-ros2-geometry/connector/pose_connector.h>
-#include <mosaic-ros2-geometry/converter.h>
+#include <mosaic-ros2-geometry/connector/pose_connector.hpp>
+#include <mosaic-ros2-geometry/converter.hpp>
 
 using namespace mosaic::ros2::geometry_connector;
 
@@ -31,7 +30,7 @@ void PoseConnectorConfigurer::Callback(geometry_msgs::msg::Pose::SharedPtr msg) 
     }
 }
 
-void PoseDataChannel::OnPoseReceived(const geometry_msgs::msg::Pose::SharedPtr& pose) {
+void PoseDataChannel::OnPoseReceived(const geometry_msgs::msg::Pose::SharedPtr &pose) {
     if (!Sendable()) {
         MOSAIC_LOG_DEBUG("PoseDataChannel Not Sendable!");
         return;

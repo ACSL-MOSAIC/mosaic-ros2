@@ -2,7 +2,7 @@
 // Created by yhkim on 1/19/26.
 //
 
-#include "mosaic-ros2-sensor/util/point_cloud2_sender.h"
+#include "mosaic-ros2-sensor/util/point_cloud2_sender.hpp"
 
 #include <array>
 #include <cmath>
@@ -12,14 +12,15 @@
 #include <thread>
 #include <vector>
 
-#include <mosaic/handlers/data_channel/a_data_channel_handler.h>
+#include <mosaic/handlers/data_channel/data_channel_handler.hpp>
 #include <uuid/uuid.h>
 
 using namespace mosaic::ros2::sensor_connector;
 
-PointCloud2Sender::PointCloud2Sender(float voxel_size) : voxel_size_(voxel_size), max_channel_idx_(0) {}
+PointCloud2Sender::PointCloud2Sender(float voxel_size) : voxel_size_(voxel_size), max_channel_idx_(0) {
+}
 
-void PointCloud2Sender::AddPointCloud2DataChannel(const std::shared_ptr<PointCloud2DataChannel>& channel) {
+void PointCloud2Sender::AddPointCloud2DataChannel(const std::shared_ptr<PointCloud2DataChannel> &channel) {
     point_cloud_2_data_channels_.push_back(channel);
     max_channel_idx_++;
 }
@@ -29,7 +30,7 @@ long GetNow() {
     return std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
 }
 
-void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) {
+void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
     // Initialize the first frame
     if (!initialized_) {
         Initialize(msg);
@@ -63,7 +64,7 @@ void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg
     const auto octree_root = BuildOctree(msg, statistic);
 
     // Collect leaf nodes
-    std::vector<OctreeNode*> leaf_nodes;
+    std::vector<OctreeNode *> leaf_nodes;
     CollectLeafNodes(octree_root.get(), leaf_nodes);
 
     // 3. Timestamp after building octree
@@ -72,7 +73,7 @@ void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg
     // TODO: Extract logic below into a function
 
     const uint32_t point_step = msg->point_step;
-    const uint8_t* data_ptr = msg->data.data();
+    const uint8_t *data_ptr = msg->data.data();
 
     size_t chunk_idx = 0;
     size_t total_points_sent = 0;
@@ -90,7 +91,7 @@ void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg
             has_remaining_points = false;
 
             // Iterate through each leaf node
-            for (auto* leaf : leaf_nodes) {
+            for (auto *leaf: leaf_nodes) {
                 // If this leaf still has points
                 if (!leaf->point_indices.empty()) {
                     has_remaining_points = true;
@@ -100,7 +101,7 @@ void PointCloud2Sender::Send(const sensor_msgs::msg::PointCloud2::SharedPtr& msg
                     leaf->point_indices.pop_back();
 
                     // Add point data to chunk buffer
-                    const uint8_t* point_ptr = data_ptr + point_idx * point_step;
+                    const uint8_t *point_ptr = data_ptr + point_idx * point_step;
                     chunk_buffer.insert(chunk_buffer.end(), point_ptr, point_ptr + point_step);
 
                     ++points_in_chunk;
@@ -149,7 +150,7 @@ bool PointCloud2Sender::IsAllChannelReady() const {
     if (point_cloud_2_data_channels_.empty()) {
         return false;
     }
-    for (const auto& channel : point_cloud_2_data_channels_) {
+    for (const auto &channel: point_cloud_2_data_channels_) {
         if (channel->Sendable()) {
             return true;
         }
@@ -180,7 +181,7 @@ std::string GenerateUUID() {
 }
 
 std::shared_ptr<point_cloud_2::Meta> PointCloud2Sender::ExtractMeta(
-    const sensor_msgs::msg::PointCloud2::SharedPtr& msg) const {
+    const sensor_msgs::msg::PointCloud2::SharedPtr &msg) const {
     auto meta = std::make_shared<point_cloud_2::Meta>();
 
     meta->set_timestamp(GetNow());
@@ -203,8 +204,8 @@ std::shared_ptr<point_cloud_2::Meta> PointCloud2Sender::ExtractMeta(
     meta->set_min_z(config_.min_z);
     meta->set_max_z(config_.max_z);
 
-    for (const auto& ros_field : msg->fields) {
-        auto* proto_field = meta->add_fields();
+    for (const auto &ros_field: msg->fields) {
+        auto *proto_field = meta->add_fields();
         proto_field->set_name(ros_field.name);
         proto_field->set_offset(ros_field.offset);
         proto_field->set_datatype(ros_field.datatype);
@@ -214,13 +215,13 @@ std::shared_ptr<point_cloud_2::Meta> PointCloud2Sender::ExtractMeta(
     return meta;
 }
 
-bool PointCloud2Sender::FindXYZOffsets(const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
-                                       unsigned int& x_offset,
-                                       unsigned int& y_offset,
-                                       unsigned int& z_offset) const {
+bool PointCloud2Sender::FindXYZOffsets(const sensor_msgs::msg::PointCloud2::SharedPtr &msg,
+                                       unsigned int &x_offset,
+                                       unsigned int &y_offset,
+                                       unsigned int &z_offset) const {
     bool found_x = false, found_y = false, found_z = false;
 
-    for (const auto& field : msg->fields) {
+    for (const auto &field: msg->fields) {
         if (field.name == "x") {
             x_offset = field.offset;
             found_x = true;
@@ -236,7 +237,7 @@ bool PointCloud2Sender::FindXYZOffsets(const sensor_msgs::msg::PointCloud2::Shar
     return found_x && found_y && found_z;
 }
 
-void PointCloud2Sender::Initialize(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) {
+void PointCloud2Sender::Initialize(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
     // Find XYZ offsets
     if (!FindXYZOffsets(msg, config_.x_offset, config_.y_offset, config_.z_offset)) {
         throw std::runtime_error("Failed to find XYZ fields in PointCloud2 message");
@@ -261,14 +262,14 @@ void PointCloud2Sender::Initialize(const sensor_msgs::msg::PointCloud2::SharedPt
     constexpr size_t NUM_LEVELS = 5;
     const size_t avg_points_per_level = config_.total_points / NUM_LEVELS;
     config_.estimated_chunks_per_level =
-        (avg_points_per_level + config_.max_points_per_chunk - 1) / config_.max_points_per_chunk;
+            (avg_points_per_level + config_.max_points_per_chunk - 1) / config_.max_points_per_chunk;
 
     initialized_ = true;
 }
 
-void PointCloud2Sender::ComputeBoundingBox(const sensor_msgs::msg::PointCloud2::SharedPtr& msg) {
+void PointCloud2Sender::ComputeBoundingBox(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
     const uint32_t point_step = msg->point_step;
-    const uint8_t* data_ptr = msg->data.data();
+    const uint8_t *data_ptr = msg->data.data();
     const size_t total_points = msg->width * msg->height;
 
     // Initialize min/max values
@@ -281,7 +282,7 @@ void PointCloud2Sender::ComputeBoundingBox(const sensor_msgs::msg::PointCloud2::
 
     // Iterate through all points to find min/max
     for (size_t i = 0; i < total_points; ++i) {
-        const uint8_t* point_ptr = data_ptr + i * point_step;
+        const uint8_t *point_ptr = data_ptr + i * point_step;
 
         float x, y, z;
         std::memcpy(&x, point_ptr + config_.x_offset, sizeof(float));
@@ -300,7 +301,7 @@ void PointCloud2Sender::ComputeBoundingBox(const sensor_msgs::msg::PointCloud2::
     }
 
     // Add 10% margin
-    constexpr float MARGIN = 0.1f;  // 10% margin
+    constexpr float MARGIN = 0.1f; // 10% margin
     const float x_range = max_x - min_x;
     const float y_range = max_y - min_y;
     const float z_range = max_z - min_z;
@@ -318,21 +319,21 @@ void PointCloud2Sender::ComputeBoundingBox(const sensor_msgs::msg::PointCloud2::
     config_.max_z = max_z + z_margin;
 
     // Robot position-based ranges (assuming robot is at origin, using values with margin applied)
-    config_.forward = config_.max_x;    // Forward (positive x-axis direction)
-    config_.backward = -config_.min_x;  // Backward (negative x-axis direction)
-    config_.right = config_.max_y;      // Right (positive y-axis direction)
-    config_.left = -config_.min_y;      // Left (negative y-axis direction)
-    config_.up = config_.max_z;         // Up (positive z-axis direction)
-    config_.down = -config_.min_z;      // Down (negative z-axis direction)
+    config_.forward = config_.max_x; // Forward (positive x-axis direction)
+    config_.backward = -config_.min_x; // Backward (negative x-axis direction)
+    config_.right = config_.max_y; // Right (positive y-axis direction)
+    config_.left = -config_.min_y; // Left (negative y-axis direction)
+    config_.up = config_.max_z; // Up (positive z-axis direction)
+    config_.down = -config_.min_z; // Down (negative z-axis direction)
 }
 
-void PointCloud2Sender::SendData(const std::string& data) {
+void PointCloud2Sender::SendData(const std::string &data) {
     if (const auto channel = GetNextChannel(); channel != nullptr) {
         channel->SendStringAsByte(data, false);
     }
 }
 
-OctreeNode* PointCloud2Sender::FindLeafNode(OctreeNode* node, const float x, const float y, const float z) {
+OctreeNode *PointCloud2Sender::FindLeafNode(OctreeNode *node, const float x, const float y, const float z) {
     // Return if it's a leaf node
     if (node->is_leaf()) {
         return node;
@@ -356,7 +357,7 @@ OctreeNode* PointCloud2Sender::FindLeafNode(OctreeNode* node, const float x, con
     return FindLeafNode(node->children[octant].get(), x, y, z);
 }
 
-void PointCloud2Sender::CollectLeafNodes(OctreeNode* node, std::vector<OctreeNode*>& leaf_nodes) {
+void PointCloud2Sender::CollectLeafNodes(OctreeNode *node, std::vector<OctreeNode *> &leaf_nodes) {
     if (node->is_leaf()) {
         // Collect only leaf nodes (if they have points)
         if (!node->point_indices.empty()) {
@@ -364,7 +365,7 @@ void PointCloud2Sender::CollectLeafNodes(OctreeNode* node, std::vector<OctreeNod
         }
     } else {
         // Recursively traverse child nodes
-        for (const auto& child : node->children) {
+        for (const auto &child: node->children) {
             if (child) {
                 CollectLeafNodes(child.get(), leaf_nodes);
             }
@@ -372,8 +373,8 @@ void PointCloud2Sender::CollectLeafNodes(OctreeNode* node, std::vector<OctreeNod
     }
 }
 
-std::unique_ptr<OctreeNode> PointCloud2Sender::BuildOctree(const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
-                                                           const std::shared_ptr<LiDARStatisticMessage>& statistic) {
+std::unique_ptr<OctreeNode> PointCloud2Sender::BuildOctree(const sensor_msgs::msg::PointCloud2::SharedPtr &msg,
+                                                           const std::shared_ptr<LiDARStatisticMessage> &statistic) {
     // Step 1: Create root node (entire bounding box)
     auto root = std::make_unique<OctreeNode>();
     root->min_x = config_.min_x;
@@ -385,14 +386,14 @@ std::unique_ptr<OctreeNode> PointCloud2Sender::BuildOctree(const sensor_msgs::ms
 
     // Step 2: Collect all valid points and assign to root
     const uint32_t point_step = msg->point_step;
-    const uint8_t* data_ptr = msg->data.data();
+    const uint8_t *data_ptr = msg->data.data();
     const size_t total_points = msg->width * msg->height;
 
     std::vector<size_t> root_point_indices;
     root_point_indices.reserve(total_points);
 
     for (size_t point_idx = 0; point_idx < total_points; ++point_idx) {
-        const uint8_t* point_ptr = data_ptr + point_idx * point_step;
+        const uint8_t *point_ptr = data_ptr + point_idx * point_step;
 
         // Read XYZ coordinates
         float x, y, z;
@@ -418,9 +419,9 @@ std::unique_ptr<OctreeNode> PointCloud2Sender::BuildOctree(const sensor_msgs::ms
     return root;
 }
 
-void PointCloud2Sender::SubdivideNode(OctreeNode* node,
-                                      const sensor_msgs::msg::PointCloud2::SharedPtr& msg,
-                                      const std::vector<size_t>& point_indices) {
+void PointCloud2Sender::SubdivideNode(OctreeNode *node,
+                                      const sensor_msgs::msg::PointCloud2::SharedPtr &msg,
+                                      const std::vector<size_t> &point_indices) {
     // Subdivision stopping condition 1: 10 or fewer points
     constexpr size_t MIN_POINTS_TO_SUBDIVIDE = 10;
     if (point_indices.size() <= MIN_POINTS_TO_SUBDIVIDE) {
@@ -442,7 +443,7 @@ void PointCloud2Sender::SubdivideNode(OctreeNode* node,
     // Create 8 child nodes and set spatial ranges
     for (int i = 0; i < 8; ++i) {
         node->children[i] = std::make_unique<OctreeNode>();
-        const auto& child = node->children[i];
+        const auto &child = node->children[i];
 
         // Set spatial range according to octant index
         // i's bits: [z][y][x]
@@ -458,10 +459,10 @@ void PointCloud2Sender::SubdivideNode(OctreeNode* node,
     std::array<std::vector<size_t>, 8> octant_points;
 
     const uint32_t point_step = msg->point_step;
-    const uint8_t* data_ptr = msg->data.data();
+    const uint8_t *data_ptr = msg->data.data();
 
-    for (size_t point_idx : point_indices) {
-        const uint8_t* point_ptr = data_ptr + point_idx * point_step;
+    for (size_t point_idx: point_indices) {
+        const uint8_t *point_ptr = data_ptr + point_idx * point_step;
 
         // Read XYZ coordinates
         float x, y, z;
@@ -498,7 +499,7 @@ int PointCloud2Sender::GetOctant(const float x,
     return octant;
 }
 
-void PointCloud2Sender::SendStatistic(const std::shared_ptr<LiDARStatisticMessage>& statistic) {
+void PointCloud2Sender::SendStatistic(const std::shared_ptr<LiDARStatisticMessage> &statistic) {
     const auto ppcStatistic = std::make_shared<point_cloud_2::Statistic>();
 
     ppcStatistic->set_timestamp(GetNow());
@@ -511,7 +512,7 @@ void PointCloud2Sender::SendStatistic(const std::shared_ptr<LiDARStatisticMessag
     ppcStatistic->set_octree_built_timestamp(statistic->octree_built_timestamp);
     ppcStatistic->set_all_chunks_sent_timestamp(statistic->all_chunks_sent_timestamp);
 
-    for (const auto& ts : statistic->chunk_sent_timestamps) {
+    for (const auto &ts: statistic->chunk_sent_timestamps) {
         ppcStatistic->add_chunk_sent_timestamps(ts);
     }
 

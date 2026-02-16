@@ -2,11 +2,11 @@
 // Created by yhkim on 1/5/26.
 //
 
-#ifndef MOSAIC_ROS2_TWIST_CONNECTOR_H
-#define MOSAIC_ROS2_TWIST_CONNECTOR_H
+#ifndef MOSAIC_ROS2_GEOMETRY_TWIST_CONNECTOR_H
+#define MOSAIC_ROS2_GEOMETRY_TWIST_CONNECTOR_H
 
-#include <mosaic-ros2-base/configurer/ros2_a_dc_handler_configurer.h>
-#include <mosaic/handlers/data_channel/data_channel_receivable.h>
+#include <mosaic-ros2-base/configurer/ros2_a_dc_handler_configurer.hpp>
+#include <mosaic/handlers/data_channel/data_channel_receivable.hpp>
 
 #include "geometry_msgs/msg/twist.hpp"
 
@@ -42,4 +42,4 @@ namespace mosaic::ros2::geometry_connector {
     };
 } // namespace mosaic::ros2::geometry_connector
 
-#endif  // MOSAIC_ROS2_TWIST_CONNECTOR_H
+#endif  // MOSAIC_ROS2_GEOMETRY_TWIST_CONNECTOR_H

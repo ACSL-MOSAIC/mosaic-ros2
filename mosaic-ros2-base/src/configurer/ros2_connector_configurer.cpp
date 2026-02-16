@@ -2,7 +2,7 @@
 // Created by yhkim on 1/19/26.
 //
 
-#include "mosaic-ros2-base/configurer/ros2_connector_configurer.h"
+#include "mosaic-ros2-base/configurer/ros2_connector_configurer.hpp"
 
 using namespace mosaic::ros2;
 

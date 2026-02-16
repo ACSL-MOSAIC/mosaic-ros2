@@ -2,10 +2,9 @@
 // Created by yhkim on 1/5/26.
 //
 
-#include <json/json.h>
-#include <mosaic-ros2-geometry/connector/twist_stamped_connector.h>
+#include <mosaic-ros2-geometry/connector/twist_stamped_connector.hpp>
 
-#include <mosaic-ros2-geometry/converter.h>
+#include <mosaic-ros2-geometry/converter.hpp>
 
 using namespace mosaic::ros2::geometry_connector;
 

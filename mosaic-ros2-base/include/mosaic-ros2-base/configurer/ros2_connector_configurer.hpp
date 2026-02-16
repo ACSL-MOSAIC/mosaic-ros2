@@ -2,14 +2,14 @@
 // Created by yhkim on 1/1/26.
 //
 
-#ifndef MOSAIC_ROS2_ROS2_CONNECTOR_CONFIGURER_H
-#define MOSAIC_ROS2_ROS2_CONNECTOR_CONFIGURER_H
+#ifndef MOSAIC_ROS2_BASE_ROS2_CONNECTOR_CONFIGURER_HPP
+#define MOSAIC_ROS2_BASE_ROS2_CONNECTOR_CONFIGURER_HPP
 
 #include <memory>
 
-#include <mosaic/configs_decl.h>
+#include <mosaic/configs_decl.hpp>
 
-#include "mosaic-ros2-base/node/mosaic_node.h"
+#include "mosaic-ros2-base/node/mosaic_node.hpp"
 
 namespace mosaic::ros2 {
     class ROS2ConnectorConfigurer {
@@ -28,4 +28,4 @@ namespace mosaic::ros2 {
     };
 } // namespace mosaic::ros2
 
-#endif  // MOSAIC_ROS2_ROS2_CONNECTOR_CONFIGURER_H
+#endif  // MOSAIC_ROS2_BASE_ROS2_CONNECTOR_CONFIGURER_HPP

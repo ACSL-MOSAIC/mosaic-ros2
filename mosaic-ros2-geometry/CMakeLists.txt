@@ -12,7 +12,6 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(mosaic-core REQUIRED)
 find_package(mosaic-ros2-base REQUIRED)
-find_package(jsoncpp REQUIRED)
 
 add_library(mosaic-ros2-geometry STATIC
         src/register.cpp
@@ -30,7 +29,6 @@ ament_target_dependencies(mosaic-ros2-geometry
         geometry_msgs
         mosaic-core
         mosaic-ros2-base
-        jsoncpp
 )
 
 install(TARGETS mosaic-ros2-geometry

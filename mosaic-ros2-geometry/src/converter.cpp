@@ -2,7 +2,7 @@
 // Created by yhkim on 2/8/26.
 //
 
-#include "mosaic-ros2-geometry/converter.h"
+#include "mosaic-ros2-geometry/converter.hpp"
 
 namespace mosaic::ros2::geometry_connector {
 geometry_msgs::msg::Vector3 JsonToVector3(Json::Value json) {

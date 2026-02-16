@@ -2,17 +2,17 @@
 // Created by yhkim on 1/20/26.
 //
 
-#ifndef BUILD_ROS2_A_PARALLEL_DC_HANDLER_CONFIGURER_H
-#define BUILD_ROS2_A_PARALLEL_DC_HANDLER_CONFIGURER_H
+#ifndef MOSAIC_ROS2_BASE_ROS2_A_PARALLEL_DC_HANDLER_CONFIGURER_HPP
+#define MOSAIC_ROS2_BASE_ROS2_A_PARALLEL_DC_HANDLER_CONFIGURER_HPP
 
-#include "mosaic/auto_configurer/connector/a_parallel_dc_handler_configurer.h"
-#include "ros2_connector_configurer.h"
+#include "mosaic/auto_configurer/connector/configurable_connectors.hpp"
+#include "ros2_connector_configurer.hpp"
 
 namespace mosaic::ros2 {
-    class ROS2AParallelDCHandlerConfigurer : public auto_configurer::AParallelDCHandlerConfigurer,
+    class ROS2AMultipleDCHandlerConfigurer : public auto_configurer::AMultipleDCHandlerConfigurer,
                                              public ROS2ConnectorConfigurer {
     public:
-        ROS2AParallelDCHandlerConfigurer() = default;
+        ROS2AMultipleDCHandlerConfigurer() = default;
 
         virtual std::string GetConnectorType() const override = 0;
 
@@ -30,4 +30,4 @@ namespace mosaic::ros2 {
     };
 } // namespace mosaic::ros2
 
-#endif  // BUILD_ROS2_A_PARALLEL_DC_HANDLER_CONFIGURER_H
+#endif  // MOSAIC_ROS2_BASE_ROS2_A_PARALLEL_DC_HANDLER_CONFIGURER_HPP

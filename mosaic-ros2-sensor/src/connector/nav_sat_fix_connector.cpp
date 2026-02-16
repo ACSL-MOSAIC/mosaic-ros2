@@ -2,9 +2,7 @@
 // Created by yhkim on 1/5/26.
 //
 
-#include "mosaic-ros2-sensor/connector/nav_sat_fix_connector.h"
-
-#include <json/json.h>
+#include "mosaic-ros2-sensor/connector/nav_sat_fix_connector.hpp"
 
 using namespace mosaic::ros2::sensor_connector;
 

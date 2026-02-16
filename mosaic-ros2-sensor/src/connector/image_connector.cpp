@@ -2,7 +2,7 @@
 // Created by yhkim on 1/1/26.
 //
 
-#include <mosaic-ros2-sensor/connector/image_connector.h>
+#include <mosaic-ros2-sensor/connector/image_connector.hpp>
 
 #ifdef ROS_DISTRO_JAZZY
 #include <cv_bridge/cv_bridge.hpp>

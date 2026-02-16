@@ -15,14 +15,16 @@ RUN apt-get install -y tzdata
 # Install Libraries for mosaic-core
 RUN apt install libjsoncpp-dev libssl-dev libboost-all-dev libopencv-dev libwebsocketpp-dev libcpprest-dev libfmt-dev libprotobuf-dev uuid-dev libyaml-cpp-dev -y
 
+ARG MOSAIC_CORE_VERSION=v1.1.0
 # Install mosaic-core
-RUN git clone https://github.com/ACSL-MOSAIC/mosaic-core.git /root/mosaic-core
+RUN git clone --depth 1 --branch ${MOSAIC_CORE_VERSION} \
+    https://github.com/ACSL-MOSAIC/mosaic-core.git /root/mosaic-core
 WORKDIR /root/mosaic-core/third_party
 
 RUN tar -xzvf webrtc-tarballs/webrtc-6723-x86.tar.gz
 
 WORKDIR /root/mosaic-core
-RUN mkdir build && cd build && cmake -G Ninja .. && ninja install
+RUN mkdir build && cd build && cmake -G Ninja -DBUILD_TESTS=OFF -DBUILD_PYTHON_BINDINGS=OFF .. && ninja install
 
 # Setting up ROS2 workspace
 WORKDIR /root/ros2_ws
