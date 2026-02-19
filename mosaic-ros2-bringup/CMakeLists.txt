@@ -22,9 +22,9 @@ ament_target_dependencies(mosaic-ros2-bringup
 install(TARGETS mosaic-ros2-bringup
         DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY include/
-        DESTINATION include/
-)
+#install(DIRECTORY include
+#        DESTINATION include/
+#)
 
 install(DIRECTORY launch
         DESTINATION share/${PROJECT_NAME}
