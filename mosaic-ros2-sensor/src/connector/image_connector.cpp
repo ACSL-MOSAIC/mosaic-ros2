@@ -2,7 +2,7 @@
 // Created by yhkim on 1/1/26.
 //
 
-#include <mosaic-ros2-sensor/connector/image_connector.h>
+#include <mosaic-ros2-sensor/connector/image_connector.hpp>
 
 #ifdef ROS_DISTRO_JAZZY
 #include <cv_bridge/cv_bridge.hpp>
@@ -15,10 +15,10 @@ using namespace mosaic::ros2::sensor_connector;
 void ImageConnectorConfigurer::Configure() {
     MOSAIC_LOG_INFO("Configuring ROS2 sensor_msgs::Image Connector...");
 
-    handler_ = std::make_shared<ImageMediaTrack>(connector_config_.label, mosaic_node_);
+    handler_ = std::make_shared<ImageMediaTrack>(connector_config_->label, mosaic_node_);
 
     const auto subscription = mosaic_node_->create_subscription<sensor_msgs::msg::Image>(
-        connector_config_.params.at("topic_name"),
+        connector_config_->params.at("topic_name"),
         10,
         std::bind(&ImageConnectorConfigurer::Callback, this, std::placeholders::_1));
 
@@ -63,7 +63,7 @@ void ImageMediaTrack::Stop() {
     MOSAIC_LOG_INFO("ImageMediaTrack stopped");
 }
 
-void ImageMediaTrack::OnImageReceived(const sensor_msgs::msg::Image::SharedPtr& image) {
+void ImageMediaTrack::OnImageReceived(const sensor_msgs::msg::Image::SharedPtr &image) {
     std::lock_guard lock(node_mutex_);
     last_image_ = image;
     changed_ = true;
@@ -85,11 +85,11 @@ void ImageMediaTrack::ConvertingLoop() {
             SendFrame(cv_image, start_time_);
             changed_ = false;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));  // Adjust sleep duration as needed
+        std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Adjust sleep duration as needed
     }
 }
 
-cv::Mat mosaic::ros2::sensor_connector::RosImageToCvMat(const sensor_msgs::msg::Image::SharedPtr& msg) {
+cv::Mat mosaic::ros2::sensor_connector::RosImageToCvMat(const sensor_msgs::msg::Image::SharedPtr &msg) {
     if (!msg) {
         return cv::Mat();
     }
@@ -98,7 +98,7 @@ cv::Mat mosaic::ros2::sensor_connector::RosImageToCvMat(const sensor_msgs::msg::
     try {
         const cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
         return cv_ptr->image;
-    } catch (cv_bridge::Exception& e) {
+    } catch (cv_bridge::Exception &e) {
         MOSAIC_LOG_ERROR("cv_bridge exception: %s", e.what());
         return cv::Mat();
     }

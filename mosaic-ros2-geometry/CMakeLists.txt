@@ -15,8 +15,10 @@ find_package(mosaic-ros2-base REQUIRED)
 
 add_library(mosaic-ros2-geometry STATIC
         src/register.cpp
+        src/connector/pose_connector.cpp
         src/connector/twist_connector.cpp
         src/connector/twist_stamped_connector.cpp
+        src/converter.cpp
 )
 target_include_directories(mosaic-ros2-geometry PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

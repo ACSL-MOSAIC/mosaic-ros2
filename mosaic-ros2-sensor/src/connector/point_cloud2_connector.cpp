@@ -2,11 +2,9 @@
 // Created by yhkim on 1/19/26.
 //
 
-#include "mosaic-ros2-sensor/connector/point_cloud2_connector.h"
+#include "mosaic-ros2-sensor/connector/point_cloud2_connector.hpp"
 
-#include <json/json.h>
-
-#include "mosaic-ros2-sensor/util/point_cloud2_sender.h"
+#include "mosaic-ros2-sensor/util/point_cloud2_sender.hpp"
 
 using namespace mosaic::ros2::sensor_connector;
 
@@ -17,7 +15,7 @@ void PointCloud2ConnectorConfigurer::Configure() {
     point_cloud2_sender_ = std::make_unique<PointCloud2Sender>(0.5);
 
     for (int i = 0; i < parallel_num_; i++) {
-        const auto channel_label = connector_config_.label + "_" + std::to_string(i);
+        const auto channel_label = connector_config_->label + "_" + std::to_string(i);
         const auto handler = std::make_shared<PointCloud2DataChannel>(channel_label, mosaic_node_);
         handlers_.push_back(handler);
         point_cloud2_sender_->AddPointCloud2DataChannel(handler);
@@ -35,7 +33,7 @@ void PointCloud2ConnectorConfigurer::Callback(sensor_msgs::msg::PointCloud2::Sha
 
     try {
         point_cloud2_sender_->Send(msg);
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         MOSAIC_LOG_ERROR("Failed to send PointCloud2: {}", e.what());
     }
 }

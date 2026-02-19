@@ -83,6 +83,7 @@ target_include_directories(mosaic-ros2-sensor PRIVATE
         ${UUID_INCLUDE_DIRS}
         ${PROTO_INCLUDE_DIR}
 )
+target_link_libraries(mosaic-ros2-sensor ${UUID_LIBRARIES})
 ament_target_dependencies(mosaic-ros2-sensor
         rclcpp
         sensor_msgs

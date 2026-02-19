@@ -2,19 +2,17 @@
 // Created by yhkim on 1/5/26.
 //
 
-#include "mosaic-ros2-sensor/connector/nav_sat_fix_connector.h"
-
-#include <json/json.h>
+#include "mosaic-ros2-sensor/connector/nav_sat_fix_connector.hpp"
 
 using namespace mosaic::ros2::sensor_connector;
 
 void NavSatFixConnectorConfigurer::Configure() {
     MOSAIC_LOG_INFO("Configuring ROS2 sensor_msgs::NavSatFix Connector...");
 
-    handler_ = std::make_shared<NavSatFixDataChannel>(connector_config_.label, mosaic_node_);
+    handler_ = std::make_shared<NavSatFixDataChannel>(connector_config_->label, mosaic_node_);
 
     subscription_ = mosaic_node_->create_subscription<sensor_msgs::msg::NavSatFix>(
-        connector_config_.params.at("topic_name"),
+        connector_config_->params.at("topic_name"),
         10,
         std::bind(&NavSatFixConnectorConfigurer::Callback, this, std::placeholders::_1));
 
@@ -32,7 +30,7 @@ void NavSatFixConnectorConfigurer::Callback(sensor_msgs::msg::NavSatFix::SharedP
     }
 }
 
-void NavSatFixDataChannel::OnNavSatFixReceived(const sensor_msgs::msg::NavSatFix::SharedPtr& nav_sat_fix) {
+void NavSatFixDataChannel::OnNavSatFixReceived(const sensor_msgs::msg::NavSatFix::SharedPtr &nav_sat_fix) {
     if (!Sendable()) {
         MOSAIC_LOG_DEBUG("NavSatFixDataChannel Not Sendable!");
         return;
