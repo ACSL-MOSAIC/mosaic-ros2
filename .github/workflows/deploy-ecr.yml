@@ -1,0 +1,98 @@
+name: Build and Push to AWS ECR
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  AWS_REGION: us-east-1  # ECR Public always uses us-east-1
+  ECR_REGISTRY_ALIAS: yhkim
+  ECR_REPOSITORY: mosaic/mosaic-ros2-rosbag-sim
+
+jobs:
+  build-humble:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Extract version from tag
+        id: extract_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image (humble)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-humble-rosbag-simulator
+          platforms: linux/amd64
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:humble-${{ steps.extract_version.outputs.VERSION }}
+            public.ecr.aws/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:humble
+          cache-from: type=registry,ref=public.ecr.aws/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:humble-buildcache
+          cache-to: type=registry,ref=public.ecr.aws/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:humble-buildcache,mode=max
+
+      - name: Image digest
+        run: echo "Humble image pushed successfully"
+
+  build-jazzy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Extract version from tag
+        id: extract_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image (jazzy)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-jazzy-rosbag-simulator
+          platforms: linux/amd64
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:jazzy-${{ steps.extract_version.outputs.VERSION }}
+            public.ecr.aws/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:jazzy
+          cache-from: type=registry,ref=public.ecr.aws/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:jazzy-buildcache
+          cache-to: type=registry,ref=public.ecr.aws/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:jazzy-buildcache,mode=max
+
+      - name: Image digest
+        run: echo "Jazzy image pushed successfully"
