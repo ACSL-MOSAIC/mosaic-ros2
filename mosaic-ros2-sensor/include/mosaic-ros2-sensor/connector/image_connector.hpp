@@ -53,7 +53,7 @@ namespace mosaic::ros2::sensor_connector {
 
         std::unique_ptr<std::thread> converting_loop_thread_;
         std::chrono::steady_clock::time_point start_time_;
-        std::mutex node_mutex_;
+        mutable std::shared_mutex mutex_;
 
         sensor_msgs::msg::Image::SharedPtr last_image_;
         bool changed_ = false;

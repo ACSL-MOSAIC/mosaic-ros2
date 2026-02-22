@@ -64,7 +64,7 @@ void ImageMediaTrack::Stop() {
 }
 
 void ImageMediaTrack::OnImageReceived(const sensor_msgs::msg::Image::SharedPtr &image) {
-    std::lock_guard lock(node_mutex_);
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     last_image_ = image;
     changed_ = true;
 }
@@ -74,7 +74,7 @@ void ImageMediaTrack::ConvertingLoop() {
 
     while (!GetStopFlag()) {
         if (last_image_ && changed_) {
-            std::lock_guard lock(node_mutex_);
+            std::unique_lock lock(mutex_);
             // Convert ROS image to WebRTC VideoFrame
             auto cv_image = RosImageToCvMat(last_image_);
             if (cv_image.empty()) {
