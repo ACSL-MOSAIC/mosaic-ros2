@@ -96,7 +96,7 @@ cv::Mat mosaic::ros2::sensor_connector::RosImageToCvMat(const sensor_msgs::msg::
 
     // Convert ROS Image to OpenCV Mat using cv_bridge
     try {
-        const cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
+        const cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
         return cv_ptr->image;
     } catch (cv_bridge::Exception &e) {
         MOSAIC_LOG_ERROR("cv_bridge exception: %s", e.what());
