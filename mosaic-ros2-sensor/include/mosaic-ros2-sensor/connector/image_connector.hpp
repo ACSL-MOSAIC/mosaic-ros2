@@ -47,16 +47,11 @@ namespace mosaic::ros2::sensor_connector {
         void OnImageReceived(const sensor_msgs::msg::Image::SharedPtr &image);
 
     private:
-        void ConvertingLoop();
+        void ProcessAsync(const sensor_msgs::msg::Image::SharedPtr &msg);
 
         std::shared_ptr<MosaicNode> mosaic_node_;
 
-        std::unique_ptr<std::thread> converting_loop_thread_;
         std::chrono::steady_clock::time_point start_time_;
-        mutable std::shared_mutex mutex_;
-
-        sensor_msgs::msg::Image::SharedPtr last_image_;
-        bool changed_ = false;
     };
 } // namespace mosaic::ros2::sensor_connector
 
