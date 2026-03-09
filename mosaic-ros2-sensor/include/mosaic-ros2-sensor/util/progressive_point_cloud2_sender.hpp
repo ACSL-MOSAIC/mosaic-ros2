@@ -34,8 +34,6 @@ namespace mosaic::ros2::sensor_connector {
 
         void ComputeBoundingBox(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) const;
 
-        OctreeNode *FindLeafNode(OctreeNode *node, float x, float y, float z);
-
         void CollectLeafNodes(OctreeNode *node, std::vector<OctreeNode *> &leaf_nodes);
 
         std::unique_ptr<OctreeNode> BuildOctree(const sensor_msgs::msg::PointCloud2::SharedPtr &msg);
@@ -45,7 +43,7 @@ namespace mosaic::ros2::sensor_connector {
             float x, y, z;
         };
 
-        void SubdivideNode(OctreeNode *node, const std::vector<PointData> &points);
+        void SubdivideNode(OctreeNode *node, std::vector<PointData> points);
 
         static int GetOctant(float x, float y, float z, float mid_x, float mid_y, float mid_z);
 
@@ -74,7 +72,10 @@ namespace mosaic::ros2::sensor_connector {
 
             // Check if it's a leaf node
             bool is_leaf() const {
-                return children[0] == nullptr;
+                for (const auto &child: children) {
+                    if (child) return false;
+                }
+                return true;
             }
 
             // Calculate spatial size

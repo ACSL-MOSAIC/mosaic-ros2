@@ -308,30 +308,6 @@ void ProgressivePointCloud2Sender::ComputeBoundingBox(const sensor_msgs::msg::Po
     config_->down = -config_->min_z; // Down (negative z-axis direction)
 }
 
-ProgressivePointCloud2Sender::OctreeNode *ProgressivePointCloud2Sender::FindLeafNode(
-    OctreeNode *node, const float x, const float y, const float z) {
-    // Return if it's a leaf node
-    if (node->is_leaf()) {
-        return node;
-    }
-
-    // Calculate center point
-    const float mid_x = (node->min_x + node->max_x) * 0.5f;
-    const float mid_y = (node->min_y + node->max_y) * 0.5f;
-    const float mid_z = (node->min_z + node->max_z) * 0.5f;
-
-    // Calculate octant index
-    int octant = 0;
-    if (x >= mid_x)
-        octant |= 1;
-    if (y >= mid_y)
-        octant |= 2;
-    if (z >= mid_z)
-        octant |= 4;
-
-    // Recursively search child nodes
-    return FindLeafNode(node->children[octant].get(), x, y, z);
-}
 
 void ProgressivePointCloud2Sender::CollectLeafNodes(OctreeNode *node, std::vector<OctreeNode *> &leaf_nodes) {
     if (node->is_leaf()) {
@@ -383,15 +359,14 @@ std::unique_ptr<ProgressivePointCloud2Sender::OctreeNode> ProgressivePointCloud2
     }
 
     // Step 3: Subdivide recursively using cached coordinates
-    SubdivideNode(root.get(), points);
+    SubdivideNode(root.get(), std::move(points));
 
     return root;
 }
 
-void ProgressivePointCloud2Sender::SubdivideNode(OctreeNode *node, const std::vector<PointData> &points) {
-    // Subdivision stopping condition 1: 10 or fewer points
+void ProgressivePointCloud2Sender::SubdivideNode(OctreeNode *node, std::vector<PointData> points) {
     constexpr size_t MIN_POINTS_TO_SUBDIVIDE = 10;
-    if (points.size() <= MIN_POINTS_TO_SUBDIVIDE) {
+    if (points.size() <= MIN_POINTS_TO_SUBDIVIDE || node->get_size() <= voxel_size_) {
         node->point_indices.reserve(points.size());
         for (const auto &pd: points) {
             node->point_indices.push_back(pd.index);
@@ -399,25 +374,23 @@ void ProgressivePointCloud2Sender::SubdivideNode(OctreeNode *node, const std::ve
         return;
     }
 
-    // Subdivision stopping condition 2: voxel size reached
-    if (node->get_size() <= voxel_size_) {
-        node->point_indices.reserve(points.size());
-        for (const auto &pd: points) {
-            node->point_indices.push_back(pd.index);
-        }
-        return;
-    }
-
-    // Calculate center point
     const float mid_x = (node->min_x + node->max_x) * 0.5f;
     const float mid_y = (node->min_y + node->max_y) * 0.5f;
     const float mid_z = (node->min_z + node->max_z) * 0.5f;
 
-    // Create 8 child nodes and set spatial ranges
+    // Classify points by octant first
+    std::array<std::vector<PointData>, 8> octant_points;
+    for (const auto &pd: points) {
+        octant_points[GetOctant(pd.x, pd.y, pd.z, mid_x, mid_y, mid_z)].push_back(pd);
+    }
+    points.clear();
+
+    // Create children only for non-empty octants, then recurse with move
     for (int i = 0; i < 8; ++i) {
+        if (octant_points[i].empty()) continue;
+
         node->children[i] = std::make_unique<OctreeNode>();
         const auto &child = node->children[i];
-
         // i's bits: [z][y][x]
         child->min_x = (i & 1) ? mid_x : node->min_x;
         child->max_x = (i & 1) ? node->max_x : mid_x;
@@ -425,21 +398,8 @@ void ProgressivePointCloud2Sender::SubdivideNode(OctreeNode *node, const std::ve
         child->max_y = (i & 2) ? node->max_y : mid_y;
         child->min_z = (i & 4) ? mid_z : node->min_z;
         child->max_z = (i & 4) ? node->max_z : mid_z;
-    }
 
-    // Classify points by octant using cached coordinates
-    std::array<std::vector<PointData>, 8> octant_points;
-
-    for (const auto &pd: points) {
-        const int octant = GetOctant(pd.x, pd.y, pd.z, mid_x, mid_y, mid_z);
-        octant_points[octant].push_back(pd);
-    }
-
-    // Recursively subdivide each child node
-    for (int i = 0; i < 8; ++i) {
-        if (!octant_points[i].empty()) {
-            SubdivideNode(node->children[i].get(), octant_points[i]);
-        }
+        SubdivideNode(child.get(), std::move(octant_points[i]));
     }
 }
 
