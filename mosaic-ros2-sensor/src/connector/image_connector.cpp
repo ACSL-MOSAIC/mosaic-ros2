@@ -27,7 +27,7 @@ void ImageConnectorConfigurer::Configure() {
 }
 
 void ImageConnectorConfigurer::Callback(sensor_msgs::msg::Image::SharedPtr msg) {
-    MOSAIC_LOG_DEBUG("sensor_msgs::msg::Image received");
+    MOSAIC_LOG_VERBOSE("sensor_msgs::msg::Image received");
 
     if (handler_) {
         if (const auto image_handler = std::dynamic_pointer_cast<ImageMediaTrack>(handler_)) {
@@ -43,7 +43,7 @@ void ImageMediaTrack::Start() {
     }
 
     SetRunning(true);
-    converting_loop_thread_ = std::make_unique<std::thread>(&ImageMediaTrack::ConvertingLoop, this);
+    start_time_ = std::chrono::steady_clock::now();
 
     MOSAIC_LOG_INFO("ImageMediaTrack started");
 }
@@ -54,39 +54,24 @@ void ImageMediaTrack::Stop() {
     }
 
     SetStopFlag(true);
-    if (converting_loop_thread_ && converting_loop_thread_->joinable()) {
-        converting_loop_thread_->join();
-    }
-    converting_loop_thread_.reset();
-
     SetRunning(false);
     MOSAIC_LOG_INFO("ImageMediaTrack stopped");
 }
 
 void ImageMediaTrack::OnImageReceived(const sensor_msgs::msg::Image::SharedPtr &image) {
-    std::unique_lock<std::shared_mutex> lock(mutex_);
-    last_image_ = image;
-    changed_ = true;
+    if (!IsRunning()) {
+        return;
+    }
+    ProcessAsync(image);
 }
 
-void ImageMediaTrack::ConvertingLoop() {
-    start_time_ = std::chrono::steady_clock::now();
-
-    while (!GetStopFlag()) {
-        if (last_image_ && changed_) {
-            std::unique_lock lock(mutex_);
-            // Convert ROS image to WebRTC VideoFrame
-            auto cv_image = RosImageToCvMat(last_image_);
-            if (cv_image.empty()) {
-                MOSAIC_LOG_ERROR("Failed to convert ROS Image to OpenCV Mat");
-                changed_ = false;
-                continue;
-            }
+void ImageMediaTrack::ProcessAsync(const sensor_msgs::msg::Image::SharedPtr &msg) {
+    std::thread([this, msg] {
+        // Convert ROS image to WebRTC VideoFrame
+        if (const auto cv_image = RosImageToCvMat(msg); !cv_image.empty()) {
             SendFrame(cv_image, start_time_);
-            changed_ = false;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Adjust sleep duration as needed
-    }
+    }).detach();
 }
 
 cv::Mat mosaic::ros2::sensor_connector::RosImageToCvMat(const sensor_msgs::msg::Image::SharedPtr &msg) {

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package point_cloud_2;
+package ProgressivePointCloud;
 
 message PointField {
   string name = 1;
@@ -28,5 +28,7 @@ message Meta {
   double min_z = 13;
   double max_z = 14;
 
-  repeated PointField fields = 15;
+  uint32 expected_chunk_num = 15;
+
+  repeated PointField fields = 16;
 }

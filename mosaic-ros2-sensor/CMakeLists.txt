@@ -36,9 +36,8 @@ else ()
 endif ()
 
 set(PROTO_FILES
-        protobuf/pc2_meta.proto
-        protobuf/pc2_chunk.proto
-        protobuf/pc2_statistic.proto
+        protobuf/pcc_meta.proto
+        protobuf/pcc_chunk.proto
 )
 
 # Set custom output directory for protobuf generated files
@@ -72,7 +71,12 @@ add_library(mosaic-ros2-sensor STATIC
         src/connector/image_connector.cpp
         src/connector/nav_sat_fix_connector.cpp
         src/connector/point_cloud2_connector.cpp
-        src/util/point_cloud2_sender.cpp
+        src/util/progressive_point_cloud2_sender.cpp
+        src/util/simple_point_cloud2_sender.cpp
+        src/util/clock_utils.hpp
+        src/util/clock_utils.cpp
+        src/util/uuid_utils.hpp
+        src/util/uuid_utils.cpp
         ${PROTO_SRCS}
 )
 target_include_directories(mosaic-ros2-sensor PUBLIC

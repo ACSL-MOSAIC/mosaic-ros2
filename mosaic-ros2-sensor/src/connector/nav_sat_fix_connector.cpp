@@ -21,7 +21,7 @@ void NavSatFixConnectorConfigurer::Configure() {
 }
 
 void NavSatFixConnectorConfigurer::Callback(sensor_msgs::msg::NavSatFix::SharedPtr msg) {
-    MOSAIC_LOG_DEBUG("sensor_msgs::msg::NavSatFix received");
+    MOSAIC_LOG_VERBOSE("sensor_msgs::msg::NavSatFix received");
 
     if (handler_) {
         if (const auto nav_sat_fix_handler = std::dynamic_pointer_cast<NavSatFixDataChannel>(handler_)) {
@@ -32,7 +32,6 @@ void NavSatFixConnectorConfigurer::Callback(sensor_msgs::msg::NavSatFix::SharedP
 
 void NavSatFixDataChannel::OnNavSatFixReceived(const sensor_msgs::msg::NavSatFix::SharedPtr &nav_sat_fix) {
     if (!Sendable()) {
-        MOSAIC_LOG_DEBUG("NavSatFixDataChannel Not Sendable!");
         return;
     }
 
