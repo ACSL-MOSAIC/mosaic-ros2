@@ -40,9 +40,12 @@ namespace mosaic::ros2::sensor_connector {
 
         std::unique_ptr<OctreeNode> BuildOctree(const sensor_msgs::msg::PointCloud2::SharedPtr &msg);
 
-        void SubdivideNode(OctreeNode *node,
-                           const sensor_msgs::msg::PointCloud2::SharedPtr &msg,
-                           const std::vector<size_t> &point_indices);
+        struct PointData {
+            size_t index;
+            float x, y, z;
+        };
+
+        void SubdivideNode(OctreeNode *node, const std::vector<PointData> &points);
 
         static int GetOctant(float x, float y, float z, float mid_x, float mid_y, float mid_z);
 

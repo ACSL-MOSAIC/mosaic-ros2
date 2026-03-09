@@ -360,48 +360,51 @@ std::unique_ptr<ProgressivePointCloud2Sender::OctreeNode> ProgressivePointCloud2
     root->min_z = config_->min_z;
     root->max_z = config_->max_z;
 
-    // Step 2: Collect all valid points and assign to root
+    // Step 2: Read all valid points once
     const uint32_t point_step = msg->point_step;
     const uint8_t *data_ptr = msg->data.data();
     const size_t total_points = msg->width * msg->height;
 
-    std::vector<size_t> root_point_indices;
-    root_point_indices.reserve(total_points);
+    std::vector<PointData> points;
+    points.reserve(total_points);
 
-    for (size_t point_idx = 0; point_idx < total_points; ++point_idx) {
-        const uint8_t *point_ptr = data_ptr + point_idx * point_step;
+    for (size_t i = 0; i < total_points; ++i) {
+        const uint8_t *point_ptr = data_ptr + i * point_step;
 
-        // Read XYZ coordinates
-        float x, y, z;
-        std::memcpy(&x, point_ptr + config_->x_offset, sizeof(float));
-        std::memcpy(&y, point_ptr + config_->y_offset, sizeof(float));
-        std::memcpy(&z, point_ptr + config_->z_offset, sizeof(float));
+        PointData pd;
+        std::memcpy(&pd.x, point_ptr + config_->x_offset, sizeof(float));
+        std::memcpy(&pd.y, point_ptr + config_->y_offset, sizeof(float));
+        std::memcpy(&pd.z, point_ptr + config_->z_offset, sizeof(float));
 
-        // Process only valid points
-        if (std::isfinite(x) && std::isfinite(y) && std::isfinite(z)) {
-            root_point_indices.push_back(point_idx);
+        if (std::isfinite(pd.x) && std::isfinite(pd.y) && std::isfinite(pd.z)) {
+            pd.index = i;
+            points.push_back(pd);
         }
     }
 
-    // Step 3: Subdivide recursively and assign points
-    SubdivideNode(root.get(), msg, root_point_indices);
+    // Step 3: Subdivide recursively using cached coordinates
+    SubdivideNode(root.get(), points);
 
     return root;
 }
 
-void ProgressivePointCloud2Sender::SubdivideNode(OctreeNode *node,
-                                                 const sensor_msgs::msg::PointCloud2::SharedPtr &msg,
-                                                 const std::vector<size_t> &point_indices) {
+void ProgressivePointCloud2Sender::SubdivideNode(OctreeNode *node, const std::vector<PointData> &points) {
     // Subdivision stopping condition 1: 10 or fewer points
     constexpr size_t MIN_POINTS_TO_SUBDIVIDE = 10;
-    if (point_indices.size() <= MIN_POINTS_TO_SUBDIVIDE) {
-        node->point_indices = point_indices;
+    if (points.size() <= MIN_POINTS_TO_SUBDIVIDE) {
+        node->point_indices.reserve(points.size());
+        for (const auto &pd: points) {
+            node->point_indices.push_back(pd.index);
+        }
         return;
     }
 
     // Subdivision stopping condition 2: voxel size reached
     if (node->get_size() <= voxel_size_) {
-        node->point_indices = point_indices;
+        node->point_indices.reserve(points.size());
+        for (const auto &pd: points) {
+            node->point_indices.push_back(pd.index);
+        }
         return;
     }
 
@@ -415,7 +418,6 @@ void ProgressivePointCloud2Sender::SubdivideNode(OctreeNode *node,
         node->children[i] = std::make_unique<OctreeNode>();
         const auto &child = node->children[i];
 
-        // Set spatial range according to octant index
         // i's bits: [z][y][x]
         child->min_x = (i & 1) ? mid_x : node->min_x;
         child->max_x = (i & 1) ? node->max_x : mid_x;
@@ -425,30 +427,18 @@ void ProgressivePointCloud2Sender::SubdivideNode(OctreeNode *node,
         child->max_z = (i & 4) ? node->max_z : mid_z;
     }
 
-    // Classify points by octant
-    std::array<std::vector<size_t>, 8> octant_points;
+    // Classify points by octant using cached coordinates
+    std::array<std::vector<PointData>, 8> octant_points;
 
-    const uint32_t point_step = msg->point_step;
-    const uint8_t *data_ptr = msg->data.data();
-
-    for (size_t point_idx: point_indices) {
-        const uint8_t *point_ptr = data_ptr + point_idx * point_step;
-
-        // Read XYZ coordinates
-        float x, y, z;
-        std::memcpy(&x, point_ptr + config_->x_offset, sizeof(float));
-        std::memcpy(&y, point_ptr + config_->y_offset, sizeof(float));
-        std::memcpy(&z, point_ptr + config_->z_offset, sizeof(float));
-
-        // Calculate which octant it belongs to
-        const int octant = GetOctant(x, y, z, mid_x, mid_y, mid_z);
-        octant_points[octant].push_back(point_idx);
+    for (const auto &pd: points) {
+        const int octant = GetOctant(pd.x, pd.y, pd.z, mid_x, mid_y, mid_z);
+        octant_points[octant].push_back(pd);
     }
 
     // Recursively subdivide each child node
     for (int i = 0; i < 8; ++i) {
         if (!octant_points[i].empty()) {
-            SubdivideNode(node->children[i].get(), msg, octant_points[i]);
+            SubdivideNode(node->children[i].get(), octant_points[i]);
         }
     }
 }
