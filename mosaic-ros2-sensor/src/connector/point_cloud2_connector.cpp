@@ -52,16 +52,45 @@ void PointCloud2ConnectorConfigurer::Callback(sensor_msgs::msg::PointCloud2::Sha
 }
 
 void PointCloud2Sender::AddPointCloud2DataChannel(const std::shared_ptr<PointCloud2DataChannel> &channel) {
-    point_cloud_2_data_channels_.push_back(channel);
+    data_channels_.push_back(channel);
     max_channel_idx_++;
     MOSAIC_LOG_INFO("Add data channel: {}", max_channel_idx_);
 }
 
+void PointCloud2Sender::ProcessAsync(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
+    {
+        std::lock_guard lock(mutex_);
+        if (sending_ == true) {
+            MOSAIC_LOG_ERROR("Frame drop!");
+            return;
+        }
+
+        if (!IsAllChannelReady()) {
+            MOSAIC_LOG_VERBOSE("Not all channel ready!");
+            return;
+        }
+        sending_ = true;
+    }
+
+    std::thread([this, msg] {
+        try {
+            this->ProcessMsg(msg);
+        } catch (const std::runtime_error &e) {
+            MOSAIC_LOG_ERROR("[PointCloud2Sender] Error while ProcessMsg: {}", e.what());
+        }
+
+        {
+            std::lock_guard lock(mutex_);
+            sending_ = false;
+        }
+    }).detach();
+}
+
 bool PointCloud2Sender::IsAllChannelReady() const {
-    if (point_cloud_2_data_channels_.empty()) {
+    if (data_channels_.empty()) {
         return false;
     }
-    for (const auto &channel: point_cloud_2_data_channels_) {
+    for (const auto &channel: data_channels_) {
         if (channel->Sendable()) {
             return true;
         }
@@ -72,8 +101,8 @@ bool PointCloud2Sender::IsAllChannelReady() const {
 std::shared_ptr<PointCloud2DataChannel> PointCloud2Sender::GetNextChannel(int retry_count) {
     channel_idx_++;
     channel_idx_ %= max_channel_idx_;
-    if (point_cloud_2_data_channels_[channel_idx_]->Sendable()) {
-        return point_cloud_2_data_channels_[channel_idx_];
+    if (data_channels_[channel_idx_]->Sendable()) {
+        return data_channels_[channel_idx_];
     }
     if (retry_count > 10) {
         MOSAIC_LOG_ERROR("Failed to get next channel after 10 retries!");

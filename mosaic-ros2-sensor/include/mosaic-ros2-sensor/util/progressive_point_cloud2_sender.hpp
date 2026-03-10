@@ -18,12 +18,11 @@ namespace mosaic::ros2::sensor_connector {
 
         void SetParams(const std::unordered_map<std::string, std::string> &params) override;
 
-        void ProcessAsync(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) override;
+    protected:
+        void ProcessMsg(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) override;
 
     private:
         struct OctreeNode;
-
-        void SendInternal(const sensor_msgs::msg::PointCloud2::SharedPtr &msg);
 
         std::shared_ptr<ProgressivePointCloud::Meta> ExtractMeta(
             const sensor_msgs::msg::PointCloud2::SharedPtr &msg) const;
@@ -111,9 +110,6 @@ namespace mosaic::ros2::sensor_connector {
         };
 
         bool initialized_ = false;
-        bool try_sending = false;
-        std::mutex mutex_;
-
         std::unique_ptr<PointCloudConfig> config_;
 
         float voxel_size_ = 0.5; // Minimum voxel size for octree leaf nodes (m)

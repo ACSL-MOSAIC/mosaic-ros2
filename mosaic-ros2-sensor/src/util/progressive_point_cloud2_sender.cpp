@@ -13,7 +13,6 @@
 #include <cstring>
 #include <limits>
 #include <stdexcept>
-#include <thread>
 #include <vector>
 
 #include <mosaic/handlers/data_channel/data_channel_handler.hpp>
@@ -26,32 +25,10 @@ void ProgressivePointCloud2Sender::SetParams(const std::unordered_map<std::strin
     }
 }
 
-void ProgressivePointCloud2Sender::ProcessAsync(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
-    std::thread([this, msg] {
-        this->SendInternal(msg);
-    }).detach();
-}
-
-void ProgressivePointCloud2Sender::SendInternal(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
-    {
-        std::lock_guard lock(mutex_);
-        if (try_sending == true) {
-            MOSAIC_LOG_ERROR("Frame drop!");
-            return;
-        }
-        try_sending = true;
-
-        // Initialize the first frame
-        if (!initialized_) {
-            config_ = std::make_unique<PointCloudConfig>();
-            Initialize(msg);
-        }
-
-        if (!IsAllChannelReady()) {
-            MOSAIC_LOG_VERBOSE("Not all channel ready!");
-            try_sending = false;
-            return;
-        }
+void ProgressivePointCloud2Sender::ProcessMsg(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
+    if (!initialized_) {
+        config_ = std::make_unique<PointCloudConfig>();
+        Initialize(msg);
     }
 
     const long created_timestamp = utils::GetNow();
@@ -69,11 +46,6 @@ void ProgressivePointCloud2Sender::SendInternal(const sensor_msgs::msg::PointClo
     CollectLeafNodes(octree_root.get(), leaf_nodes);
 
     SendPoints(msg, leaf_nodes, frame_id, created_timestamp);
-
-    {
-        std::lock_guard lock(mutex_);
-        try_sending = false;
-    }
 }
 
 void ProgressivePointCloud2Sender::SendPoints(const sensor_msgs::msg::PointCloud2::SharedPtr &msg,

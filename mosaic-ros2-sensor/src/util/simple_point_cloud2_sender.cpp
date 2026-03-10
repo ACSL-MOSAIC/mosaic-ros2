@@ -12,39 +12,16 @@
 #include <cstring>
 #include <limits>
 #include <stdexcept>
-#include <thread>
 #include <vector>
 
 #include <mosaic/handlers/data_channel/data_channel_handler.hpp>
 
 using namespace mosaic::ros2::sensor_connector;
 
-void SimplePointCloud2Sender::ProcessAsync(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
-    std::thread([this, msg] {
-        this->SendInternal(msg);
-    }).detach();
-}
-
-void SimplePointCloud2Sender::SendInternal(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
-    {
-        std::lock_guard lock(mutex_);
-        if (try_sending == true) {
-            MOSAIC_LOG_ERROR("Frame drop!");
-            return;
-        }
-        try_sending = true;
-
-        // Initialize the first frame
-        if (!initialized_) {
-            config_ = std::make_unique<PointCloudConfig>();
-            Initialize(msg);
-        }
-
-        if (!IsAllChannelReady()) {
-            MOSAIC_LOG_VERBOSE("Not all channel ready!");
-            try_sending = false;
-            return;
-        }
+void SimplePointCloud2Sender::ProcessMsg(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
+    if (!initialized_) {
+        config_ = std::make_unique<PointCloudConfig>();
+        Initialize(msg);
     }
 
     const long created_timestamp = utils::GetNow();
@@ -55,11 +32,6 @@ void SimplePointCloud2Sender::SendInternal(const sensor_msgs::msg::PointCloud2::
     SendData(ppc_meta->SerializeAsString());
 
     SendPoints(msg, frame_id, created_timestamp);
-
-    {
-        std::lock_guard lock(mutex_);
-        try_sending = false;
-    }
 }
 
 void SimplePointCloud2Sender::SendPoints(const sensor_msgs::msg::PointCloud2::SharedPtr &msg,

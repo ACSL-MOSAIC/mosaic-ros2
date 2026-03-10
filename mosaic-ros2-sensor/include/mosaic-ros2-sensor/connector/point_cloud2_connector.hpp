@@ -44,19 +44,24 @@ namespace mosaic::ros2::sensor_connector {
 
         virtual void SetParams(const std::unordered_map<std::string, std::string> &params) = 0;
 
-        virtual void ProcessAsync(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) = 0;
+        void ProcessAsync(const sensor_msgs::msg::PointCloud2::SharedPtr &msg);
 
     protected:
-        bool IsAllChannelReady() const;
+        virtual void ProcessMsg(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) = 0;
 
         std::shared_ptr<PointCloud2DataChannel> GetNextChannel(int retry_count);
 
         void SendData(const std::string &data);
 
     private:
+        bool IsAllChannelReady() const;
+
+        bool sending_ = false;
+        std::mutex mutex_;
+
         int channel_idx_ = 0;
         int max_channel_idx_ = 0;
-        std::vector<std::shared_ptr<PointCloud2DataChannel> > point_cloud_2_data_channels_;
+        std::vector<std::shared_ptr<PointCloud2DataChannel> > data_channels_;
     };
 
     class PointCloud2DataChannel : public handlers::DataChannelSendable {
