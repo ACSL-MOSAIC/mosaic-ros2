@@ -113,6 +113,7 @@ namespace mosaic::ros2::sensor_connector {
         std::unique_ptr<PointCloudConfig> config_;
 
         float voxel_size_ = 0.5; // Minimum voxel size for octree leaf nodes (m)
+        size_t min_points_to_subdivide_ = 10;
     };
 } // namespace mosaic::ros2::sensor_connector
 

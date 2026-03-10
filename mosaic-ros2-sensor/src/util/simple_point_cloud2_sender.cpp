@@ -174,14 +174,6 @@ void SimplePointCloud2Sender::Initialize(const sensor_msgs::msg::PointCloud2::Sh
     // Calculate maximum points per chunk
     config_->max_points_per_chunk = MAX_CHUNK_SIZE_BYTES / config_->point_step;
 
-    // Calculate estimated chunks per level
-    // Divide total points into 5 levels and estimate required chunks per level
-    // TODO: NUM_LEVELS and data channel size??
-    constexpr size_t NUM_LEVELS = 5;
-    const size_t avg_points_per_level = config_->total_points / NUM_LEVELS;
-    config_->estimated_chunks_per_level =
-            (avg_points_per_level + config_->max_points_per_chunk - 1) / config_->max_points_per_chunk;
-
     initialized_ = true;
 }
 

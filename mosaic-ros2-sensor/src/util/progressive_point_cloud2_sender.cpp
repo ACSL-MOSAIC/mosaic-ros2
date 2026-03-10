@@ -23,6 +23,9 @@ void ProgressivePointCloud2Sender::SetParams(const std::unordered_map<std::strin
     if (params.find("voxel_size") != params.end()) {
         voxel_size_ = std::stof(params.at("voxel_size"));
     }
+    if (params.find("min_points_to_subdivide") != params.end()) {
+        min_points_to_subdivide_ = std::stoi(params.at("min_points_to_subdivide"));
+    }
 }
 
 void ProgressivePointCloud2Sender::ProcessMsg(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) {
@@ -209,14 +212,6 @@ void ProgressivePointCloud2Sender::Initialize(const sensor_msgs::msg::PointCloud
     // Calculate maximum points per chunk
     config_->max_points_per_chunk = MAX_CHUNK_SIZE_BYTES / config_->point_step;
 
-    // Calculate estimated chunks per level
-    // Divide total points into 5 levels and estimate required chunks per level
-    // TODO: NUM_LEVELS and data channel size??
-    constexpr size_t NUM_LEVELS = 5;
-    const size_t avg_points_per_level = config_->total_points / NUM_LEVELS;
-    config_->estimated_chunks_per_level =
-            (avg_points_per_level + config_->max_points_per_chunk - 1) / config_->max_points_per_chunk;
-
     initialized_ = true;
 }
 
@@ -337,8 +332,7 @@ std::unique_ptr<ProgressivePointCloud2Sender::OctreeNode> ProgressivePointCloud2
 }
 
 void ProgressivePointCloud2Sender::SubdivideNode(OctreeNode *node, std::vector<PointData> points) {
-    constexpr size_t MIN_POINTS_TO_SUBDIVIDE = 10;
-    if (points.size() <= MIN_POINTS_TO_SUBDIVIDE || node->get_size() <= voxel_size_) {
+    if (points.size() <= min_points_to_subdivide_ || node->get_size() <= voxel_size_) {
         node->point_indices.reserve(points.size());
         for (const auto &pd: points) {
             node->point_indices.push_back(pd.index);

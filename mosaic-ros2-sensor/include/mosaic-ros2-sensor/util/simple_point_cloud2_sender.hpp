@@ -65,7 +65,6 @@ namespace mosaic::ros2::sensor_connector {
             uint32_t point_step; // Byte size of one point
             size_t max_points_per_chunk; // Maximum points per chunk
             size_t total_points; // Total number of points
-            size_t estimated_chunks_per_level; // Estimated chunks per level
         };
 
         bool initialized_ = false;
