@@ -16,13 +16,13 @@ namespace mosaic::ros2::sensor_connector {
 
         ~SimplePointCloud2Sender() override = default;
 
-        void SetParams(const std::unordered_map<std::string, std::string> &) override {}
+        void SetParams(const std::unordered_map<std::string, std::string> &) override {
+        }
 
-        void ProcessAsync(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) override;
+    protected:
+        void ProcessMsg(const sensor_msgs::msg::PointCloud2::SharedPtr &msg) override;
 
     private:
-        void SendInternal(const sensor_msgs::msg::PointCloud2::SharedPtr &msg);
-
         std::shared_ptr<ProgressivePointCloud::Meta> ExtractMeta(
             const sensor_msgs::msg::PointCloud2::SharedPtr &msg) const;
 
@@ -65,13 +65,9 @@ namespace mosaic::ros2::sensor_connector {
             uint32_t point_step; // Byte size of one point
             size_t max_points_per_chunk; // Maximum points per chunk
             size_t total_points; // Total number of points
-            size_t estimated_chunks_per_level; // Estimated chunks per level
         };
 
         bool initialized_ = false;
-        bool try_sending = false;
-        std::mutex mutex_;
-
         std::unique_ptr<PointCloudConfig> config_;
     };
 } // namespace mosaic::ros2::sensor_connector
